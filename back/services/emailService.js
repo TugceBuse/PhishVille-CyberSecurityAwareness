@@ -1,12 +1,19 @@
 const nodemailer = require('nodemailer');
 
+const port = Number(process.env.EMAIL_PORT) || 587;
+const isSecure = port === 465;
+
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: false, // TLS kullanımı için secure false
+  port,
+  secure: isSecure, // 465 → true, 587 → false (+STARTTLS)
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
+  },
+  tls: {
+    minVersion: 'TLSv1.2',
+    rejectUnauthorized: true,
   },
 });
 
@@ -15,33 +22,25 @@ const sendEmail = async (to, type, data = {}) => {
     let subject = '';
     let html = '';
 
-    // İçerik oluşturma
     switch (type) {
-      case 'Aktivasyon':
-        if (!data.firstName || !data.activationUrl) {
-          throw new Error('Aktivasyon için gerekli veriler eksik.');
-        }
+      case 'verify':
         subject = 'E-posta Doğrulama';
         html = `
-          <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
-            <h1 style="color: #007bff;">E-posta Doğrulama</h1>
-            <p>Merhaba ${data.firstName},</p>
-            <p>Hesabınızı aktif hale getirmek için aşağıdaki bağlantıya tıklayın:</p>
-            <a href="${data.activationUrl}" style="color: #fff; background-color: #007bff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">E-posta doğrula</a>
+          <div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5">
+            <h1 style="color:#007bff;">E-posta Doğrulama</h1>
+            <p>Hesabınızı doğrulamak için aşağıdaki bağlantıya tıklayın:</p>
+            <a href="${data.verifyUrl}" style="color:#fff;background:#007bff;padding:10px 14px;text-decoration:none;border-radius:5px;">Hesabı Doğrula</a>
           </div>
         `;
         break;
 
-      case 'Şifre Sıfırlama':
-        if (!data.resetUrl) {
-          throw new Error('Şifre sıfırlama için gerekli veriler eksik.');
-        }
-        subject = 'Şifre Sıfırlama Talebi';
+      case 'reset':
+        subject = 'Şifre Sıfırlama';
         html = `
-          <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
-            <h1 style="color: #007bff;">Şifre Sıfırlama</h1>
-            <p>Hesabınızın şifresini sıfırlamak için aşağıdaki bağlantıya tıklayın:</p>
-            <a href="${data.resetUrl}" style="color: #fff; background-color: #007bff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Şifreyi sıfırla</a>
+          <div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5">
+            <h1 style="color:#007bff;">Şifre Sıfırlama</h1>
+            <p>Şifrenizi sıfırlamak için aşağıdaki bağlantıya tıklayın:</p>
+            <a href="${data.resetUrl}" style="color:#fff;background:#007bff;padding:10px 14px;text-decoration:none;border-radius:5px;">Şifreyi Sıfırla</a>
           </div>
         `;
         break;
@@ -50,18 +49,11 @@ const sendEmail = async (to, type, data = {}) => {
         throw new Error('Geçersiz e-posta türü.');
     }
 
-    // E-posta gönderme
-    const mailOptions = {
-      from: process.env.EMAIL_USER, // Gönderici
-      to,                          // Alıcı
-      subject,                     // Konu
-      html,                        // HTML formatında içerik
-    };
-
+    const mailOptions = { from: process.env.EMAIL_USER, to, subject, html };
     await transporter.sendMail(mailOptions);
-    console.log(`E-posta başarıyla gönderildi: ${to}`);
+    console.log(`E-posta gönderildi: ${to}`);
   } catch (err) {
-    console.error('E-posta gönderimi başarısız:', err.message, err.stack);
+    console.error('E-posta gönderimi başarısız:', err.message);
     throw new Error(`E-posta gönderilemedi: ${err.message}`);
   }
 };

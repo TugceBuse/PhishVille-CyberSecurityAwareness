@@ -1,43 +1,81 @@
-// Gerekli kütüphaneleri dahil et
+// Gerekli kütüphaneler
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');  // Frontend ve Backend arasında CORS için
-const dotenv = require('dotenv');  // .env dosyasını yüklemek için
+const cors = require('cors');
+const dotenv = require('dotenv');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const compression = require('compression');
 
-// .env dosyasını yükle
 dotenv.config();
 
-// Express uygulaması oluştur
 const app = express();
 
-// CORS'u etkinleştir (eğer frontend ve backend farklı portlarda çalışıyorsa)
-app.use(cors());
+// Güvenlik başlıkları
+app.use(helmet({
+  crossOriginEmbedderPolicy: false, // PDF/iframe uyumu
+}));
 
-// JSON verisini kabul et
-app.use(express.json());
+// CORS (whitelist)
+const parseOrigins = (val) => {
+  if (!val) return [];
+  return val.split(',').map(s => s.trim()).filter(Boolean);
+};
+const allowedOrigins = parseOrigins(process.env.CORS_ORIGIN || process.env.FRONTEND_URL);
 
-// MongoDB bağlantı URI'sini almak için .env dosyasını kullanın
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true);              // Postman/server-to-server
+    if (allowedOrigins.length === 0) return cb(null, true); // dev fallback
+    if (allowedOrigins.includes(origin)) return cb(null, true);
+    return cb(new Error('CORS blocked: Origin not allowed'), false);
+  },
+  credentials: true,
+  methods: ['GET','POST','PUT','DELETE','PATCH','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization']
+}));
+
+// Body limit & URL-encoded
+app.use(express.json({ limit: '200kb' }));
+app.use(express.urlencoded({ extended: true, limit: '200kb' }));
+
+// Sıkıştırma
+app.use(compression());
+
+// Rate Limit (genel)
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 dk
+  max: 300,                  // 15 dk 300 istek
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api', apiLimiter);
+
+// MongoDB
 const mongoURI = process.env.MONGO_URI;
-
-// MongoDB'ye bağlan
+if (!mongoURI) {
+  console.error('MONGO_URI tanımlı değil!');
+  process.exit(1);
+}
 mongoose.connect(mongoURI)
   .then(() => console.log('MongoDB Bağlantısı Başarılı'))
-  .catch((err) => console.log('MongoDB Bağlantı Hatası: ', err));
+  .catch((err) => {
+    console.error('MongoDB Bağlantı Hatası: ', err);
+    process.exit(1);
+  });
 
-// Basit bir test route'u (GET)
-app.get('/', (req, res) => {
-  res.send('Backend Çalışıyor!');
+// Health check
+app.get('/health', (req, res) => {
+  res.status(200).json({ ok: true });
 });
 
-// Kullanıcı işlemleri için route'ları dahil et
+// Router’lar
 const userRoutes = require('./routes/users');
-app.use('/api/users', userRoutes);  // Kullanıcı işlemleri için /api/users endpoint'i
+app.use('/api/users', userRoutes);
 
-// Oyun oturumu işlemleri için route'ları dahil et
 const gameSessionRoutes = require('./routes/gameSession');
-app.use('/api/gamesessions', gameSessionRoutes); // oyun oturumları için endpoint
+app.use('/api/gamesessions', gameSessionRoutes);
 
-// Sunucu dinlemeye başla
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server ${PORT} portunda çalışıyor`);
