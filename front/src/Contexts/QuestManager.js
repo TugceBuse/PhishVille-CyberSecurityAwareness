@@ -61,7 +61,9 @@ export function QuestManagerProvider({ children }) {
 
     // Güvenli defaultlar
     status: q.status || "locked",
-    completedAt: q.completedAt ?? null,
+    completedAt: q.completedAt ?? null,     // gerçek tarih kullanılmıyor ama geriye uyum için korunuyor
+    completedAtMs: q.completedAtMs ?? null, // OYUN İÇİ zaman
+    earlyCompleted: q.earlyCompleted ?? false, // ← YENİ: normalize
     score: q.score ?? 0,
   });
 
@@ -73,7 +75,6 @@ export function QuestManagerProvider({ children }) {
   // Fail yüzünden başarı bağımlılığı imkânsızlaşan görevleri SKIP et
   const resolveSkips = (arr) => {
     let updated = arr.map((q) => ({ ...q }));
-    let changed = false;
 
     updated.forEach((q, idx) => {
       if (q.status !== "locked") return;
@@ -88,14 +89,13 @@ export function QuestManagerProvider({ children }) {
         updated[idx] = {
           ...q,
           status: "skipped",
-          completedAt: updated[idx].completedAt ?? gameMs,
-          // skipped puan yazmıyoruz (0)
+          completedAtMs: updated[idx].completedAtMs ?? gameMs, // OYUN İÇİ zaman kullan
+          // earlyCompleted'a dokunmuyoruz
         };
-        changed = true;
       }
     });
 
-    return { updated, changed };
+    return { updated };
   };
 
   // ─────────────────────────────────────────────────────────
@@ -203,8 +203,8 @@ export function QuestManagerProvider({ children }) {
 
   // ─────────────────────────────────────────────────────────
   // TEK NOKTADAN TAMAMLAMA:
-  // - active ise → completed
-  // - locked && acceptsEarlyCompletion !== false ise → completed_hidden
+  // - active ise → completed (earlyCompleted:false)
+  // - locked && acceptsEarlyCompletion !== false ise → completed_hidden (earlyCompleted:true)
   // - locked && acceptsEarlyCompletion === false ise → eğer şu an aktive edilebiliyorsa
   //   aynı çağrıda active yap + hemen completed; değilse no-op
   const completeQuest = (id) => {
@@ -245,7 +245,8 @@ export function QuestManagerProvider({ children }) {
           return {
             ...q,
             status: "completed_hidden",
-            completedAt: gameMs,
+            completedAtMs: gameMs,   // OYUN İÇİ zaman
+            earlyCompleted: true,    // ← KRİTİK: erken tamamlandı
             score: q.point || 0,
             logEventType: q.logEventType,
           };
@@ -256,7 +257,8 @@ export function QuestManagerProvider({ children }) {
           return {
             ...q,
             status: "completed",
-            completedAt: gameMs,
+            completedAtMs: gameMs,   // OYUN İÇİ zaman
+            earlyCompleted: false,   // ← aktifken tamamlandı
             score: q.point || 0,
             logEventType: q.logEventType,
           };
@@ -296,7 +298,7 @@ export function QuestManagerProvider({ children }) {
           })
         );
       }
-      console.log(updated);
+
       return updated;
     });
   };
@@ -317,7 +319,8 @@ export function QuestManagerProvider({ children }) {
           ? {
               ...q,
               status: "failed",
-              completedAt: gameMs,
+              completedAtMs: gameMs, // OYUN İÇİ zaman
+              // earlyCompleted'a dokunmuyoruz
               score: q.penalty || 0,
               logEventType: q.logEventType,
             }
@@ -348,7 +351,7 @@ export function QuestManagerProvider({ children }) {
           })
         );
       }
-      console.log(updated);
+
       return updated;
     });
   };
@@ -361,7 +364,9 @@ export function QuestManagerProvider({ children }) {
         QUEST_LIST.map((q) => ({
           ...q,
           status: q.status || "locked",
-          completedAt: null,
+          completedAt: null,    // gerçek tarih tutulmuyorsa boş bırak
+          completedAtMs: null,  // oyun içi ms sıfırla
+          earlyCompleted: false,
           score: 0,
           logEventType: q.logEventType,
           _unlockFlag: false,
