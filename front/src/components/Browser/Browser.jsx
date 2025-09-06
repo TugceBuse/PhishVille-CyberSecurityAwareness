@@ -362,13 +362,24 @@ const Browser = ({ closeHandler, style }) => {
 
     if (currentUrl.startsWith("http://reset/")) {
       try {
-        const urlObj = new URL(currentUrl.replace("http://", "http://dummy."));
-        const path = urlObj.pathname.replace("/", ""); // "procareerhub" gibi
-        const siteDisplayName = path === "procareerhub" ? "ProCareerHub" : "Bilinmeyen";
+         window.currentBrowserUrl = currentUrl;
+
+        const dummyUrl = currentUrl.replace("http://", "http://dummy.");
+        const urlObj = new URL(dummyUrl);
+        // 1. siteKey'i al
+        const siteKey = urlObj.pathname.replace("/", "").toLowerCase();
+
+        // 2. siteKey ile eşleşen siteyi, sites objesinin değerlerinden title'a göre bul
+        const siteEntry = Object.entries(sites).find(
+          ([_, config]) => config?.title?.toLowerCase() === siteKey
+        );
+
+        // 3. siteName'i al veya bilinmeyen fallback
+        const siteName = siteEntry?.[1]?.title || "Bilinmeyen";
 
         return (
           <ResetPassword
-            siteName={siteDisplayName}
+            siteName={siteName}
           />
         );
       } catch (e) {

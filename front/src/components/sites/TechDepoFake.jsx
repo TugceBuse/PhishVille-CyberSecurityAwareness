@@ -7,7 +7,7 @@ import cardsData from "../../constants/cards";
 const cards = cardsData.cards;
 
 const TechDepo = ({scrollRef}) => {
-  const { TechInfoF, setTechInfoF } = useGameContext();
+  const { TechDepoInfoF, setTechDepoInfoF } = useGameContext();
   const {addEventLog} = useEventLog();
   const [productInfo, setProductInfo] = useState({
     productIDs: []
@@ -22,7 +22,7 @@ const TechDepo = ({scrollRef}) => {
 
   // Ödeme sayfasına geçiş yaparken kullanıcı durumunu kontrol et
   const secureSetPage = (nextPage) => {
-    if (nextPage === "payment" && !(TechInfoF.isLoggedIn || TechInfoF.isGuest)) {
+    if (nextPage === "payment" && !(TechDepoInfoF.isLoggedIn || TechDepoInfoF.isGuest)) {
       setPage("authChoice");
     } else {
       setPage(nextPage);
@@ -46,16 +46,16 @@ const TechDepo = ({scrollRef}) => {
   const [errorMessage, setErrorMessage] = useState("");
   const errorRef = useRef(null);
 
-  const email = TechInfoF.email;
+  const email = TechDepoInfoF.email;
 
   useEffect(() => {
-    if(!TechInfoF.isLoggedIn) {
+    if(!TechDepoInfoF.isLoggedIn) {
         setName("");
         setSurname("");
         setPassword("");
         setErrorMessage("");
     } 
-  }, [TechInfoF.isLoggedIn]);
+  }, [TechDepoInfoF.isLoggedIn]);
 
   useEffect(() => {
     scrollRef?.current?.scrollTo?.({ top: 0, behavior: "auto" });
@@ -65,7 +65,7 @@ const TechDepo = ({scrollRef}) => {
   const handleAuth = () => {
   
     if (!isLogin) {
-      // if (TechInfoF.isRegistered && TechInfoF.email === email) {
+      // if (TechDepoInfoF.isRegistered && TechDepoInfoF.email === email) {
       //   showTemporaryError("Bu e-posta adresi ile zaten bir hesap oluşturulmuş!");
       //   return;
       // }
@@ -74,8 +74,8 @@ const TechDepo = ({scrollRef}) => {
       //   return;
       // }
   
-      setTechInfoF({
-        ...TechInfoF,
+      setTechDepoInfoF({
+        ...TechDepoInfoF,
         name,
         surname,
         password,
@@ -98,17 +98,17 @@ const TechDepo = ({scrollRef}) => {
       });
       setErrorMessage("");
     } else {
-      // if (!TechInfoF.isRegistered || TechInfoF.email !== email) {
+      // if (!TechDepoInfoF.isRegistered || TechDepoInfoF.email !== email) {
       //   showTemporaryError("Bu e-posta ile kayıtlı bir hesap bulunmamaktadır.");
       //   return;
       // }
-      // if (!password || password !== TechInfoF.password) {
+      // if (!password || password !== TechDepoInfoF.password) {
       //   showTemporaryError("Hatalı şifre! Lütfen tekrar deneyin.");
       //   return;
       // }
 
-      setTechInfoF({
-        ...TechInfoF,
+      setTechDepoInfoF({
+        ...TechDepoInfoF,
         isLoggedIn: true,
         isGuest: false,
       });
@@ -137,8 +137,8 @@ const TechDepo = ({scrollRef}) => {
   }, []);
 
   const handleLogout = () => {
-    setTechInfoF({
-      ...TechInfoF,
+    setTechDepoInfoF({
+      ...TechDepoInfoF,
       isLoggedIn: false,
     });
     setName("");
@@ -288,7 +288,7 @@ const TechDepo = ({scrollRef}) => {
     // }
 
     if (saveCard) {
-      setTechInfoF((prev) => ({
+      setTechDepoInfoF((prev) => ({
         ...prev,
         cardNumber,
         cardName,
@@ -329,7 +329,7 @@ const TechDepo = ({scrollRef}) => {
       setTimeout(() => setShowCartNotice(false), 2000);
 
       let value = 0;
-      if (TechInfoF.acceptedPreApprovedLoan){
+      if (TechDepoInfoF.acceptedPreApprovedLoan){
         value -= 5; // Bilgilerini kampanya karşılığı paylaşmayı kabul ederse -5
       } else {
         value += 5; // Bilgilerini kampanya karşılığı paylaşmayı kabul etmezse +5
@@ -339,12 +339,12 @@ const TechDepo = ({scrollRef}) => {
       } else {
         value += 5; // Kart kaydedilmemişse artı puan
       }
-      if (TechInfoF.acceptedCampaignTerms) {
+      if (TechDepoInfoF.acceptedCampaignTerms) {
         value -= 5; // Kampanya koşullarını kabul etmişse eksi puan
       } else {
         value += 5; // Kampanya koşullarını kabul etmemişse eksi puan
       }
-      if (TechInfoF.tckn && TechInfoF.birthDate && TechInfoF.motherMaiden) {
+      if (TechDepoInfoF.tckn && TechDepoInfoF.birthDate && TechDepoInfoF.motherMaiden) {
         value -= 5; // Fazla kişisel bilgi girişi yapmışsa eksi puan
       }
 
@@ -357,15 +357,15 @@ const TechDepo = ({scrollRef}) => {
           store: "TechDepoF",
           isFake: true,
           isSaveCard: saveCard,
-          isAcceptedCampaignTerms: TechInfoF.acceptedCampaignTerms,
-          isAcceptedPreApprovedLoan: TechInfoF.acceptedPreApprovedLoan,
-          tckn: TechInfoF.tckn,
-          birthDate: TechInfoF.birthDate,
-          motherMaiden: TechInfoF.motherMaiden,
+          isAcceptedCampaignTerms: TechDepoInfoF.acceptedCampaignTerms,
+          isAcceptedPreApprovedLoan: TechDepoInfoF.acceptedPreApprovedLoan,
+          tckn: TechDepoInfoF.tckn,
+          birthDate: TechDepoInfoF.birthDate,
+          motherMaiden: TechDepoInfoF.motherMaiden,
         }
       });
 
-      setTechInfoF(prev => ({
+      setTechDepoInfoF(prev => ({
         ...prev,
         tckn: "",
         birthDate: "",
@@ -388,28 +388,28 @@ const TechDepo = ({scrollRef}) => {
     if (!acceptedTerms) newErrors.terms = "Gizlilik ve satış sözleşmesini onaylamalısınız.";
   
     // Kişisel Bilgiler Kontrolü
-    if (!TechInfoF.tckn) {
+    if (!TechDepoInfoF.tckn) {
      newErrors.tckn = "TC Kimlik numarası zorunludur.";
-    } else if (!/^\d{11}$/.test(TechInfoF.tckn)) {
+    } else if (!/^\d{11}$/.test(TechDepoInfoF.tckn)) {
      newErrors.tckn = "TC Kimlik numarası 11 haneli olmalıdır.";
     }
-    if (!TechInfoF.birthDate) newErrors.birthDate = "Doğum tarihi girilmelidir.";
-    if (!TechInfoF.motherMaiden) {
+    if (!TechDepoInfoF.birthDate) newErrors.birthDate = "Doğum tarihi girilmelidir.";
+    if (!TechDepoInfoF.motherMaiden) {
      newErrors.motherMaiden = "Anne kızlık soyadının ilk harfi zorunludur.";
-    } else if (!/^[a-zA-ZğüşıöçĞÜŞİÖÇ]$/.test(TechInfoF.motherMaiden)) {
+    } else if (!/^[a-zA-ZğüşıöçĞÜŞİÖÇ]$/.test(TechDepoInfoF.motherMaiden)) {
      newErrors.motherMaiden = "Yalnızca harf girilmelidir.";
     }
-    if (!TechInfoF.acceptedCampaignTerms) {
+    if (!TechDepoInfoF.acceptedCampaignTerms) {
      newErrors.campaignTerms = "Kampanya şartlarını onaylamalısınız.";
     }
 
     // // Kayıtlı kartla eşleşme kontrolü
-    // if (TechInfoF) {
+    // if (TechDepoInfoF) {
     //   const cardMatches =
-    //     cardNumber === TechInfoF.cardNumber &&
-    //     cardName === TechInfoF.cardName &&
-    //     expiryDate === TechInfoF.cardExpiryDate &&
-    //     cvv === TechInfoF.cardCVV;
+    //     cardNumber === TechDepoInfoF.cardNumber &&
+    //     cardName === TechDepoInfoF.cardName &&
+    //     expiryDate === TechDepoInfoF.cardExpiryDate &&
+    //     cvv === TechDepoInfoF.cardCVV;
     
     //   if (!cardMatches) {
     //     newErrors.registeredCard = "Kart bilgileri kayıtlı bilgilerle eşleşmiyor.";
@@ -448,8 +448,8 @@ const TechDepo = ({scrollRef}) => {
   };
 
   const handleEdit = () => {
-    setTechInfoF({
-      ...TechInfoF,
+    setTechDepoInfoF({
+      ...TechDepoInfoF,
       name: editableName,
       surname: editableSurname,
     });
@@ -466,18 +466,18 @@ const TechDepo = ({scrollRef}) => {
    const toggleUserMenu = () => setShowUserMenu(!showUserMenu);
 
    // Kullanıcı bilgilerini düzenlemek için state'ler
-   const [editableName, setEditableName] = useState(TechInfoF.name);
-   const [editableSurname, setEditableSurname] = useState(TechInfoF.surname);
+   const [editableName, setEditableName] = useState(TechDepoInfoF.name);
+   const [editableSurname, setEditableSurname] = useState(TechDepoInfoF.surname);
 
    useEffect(() => {
-     setEditableName(TechInfoF.name);
-     setEditableSurname(TechInfoF.surname);
-   }, [TechInfoF.name, TechInfoF.surname]);
+     setEditableName(TechDepoInfoF.name);
+     setEditableSurname(TechDepoInfoF.surname);
+   }, [TechDepoInfoF.name, TechDepoInfoF.surname]);
 
    const [infoUpdated, setInfoUpdated] = useState(false); // ✔ güncellendi bildirimi
    const isChanged =
-   editableName !== TechInfoF.name ||
-   editableSurname !== TechInfoF.surname;
+   editableName !== TechDepoInfoF.name ||
+   editableSurname !== TechDepoInfoF.surname;
 
 
    // User menu dışına tıklanıldığında menüyü kapat
@@ -502,7 +502,7 @@ const TechDepo = ({scrollRef}) => {
   // Sayfa ödeme değilse veya ödeme tamamlandıysa bilgileri temizle
   useEffect(() => {
     if (page !== "payment") {
-        setTechInfoF(prev => ({
+        setTechDepoInfoF(prev => ({
         ...prev,
         tckn: "",
         birthDate: "",
@@ -554,11 +554,11 @@ const TechDepo = ({scrollRef}) => {
                   <span className={styles.cartCounter}>{getCartItemCount()}</span>
                 )}
               </div>
-              {TechInfoF.isLoggedIn ? (
+              {TechDepoInfoF.isLoggedIn ? (
                 <div className={styles.userPanel} onClick={toggleUserMenu}>
                   <p className={styles.userName}>
                     <img src={"/techDepo/programmer.png"} alt="user" /> 
-                    {TechInfoF.name} {TechInfoF.surname}
+                    {TechDepoInfoF.name} {TechDepoInfoF.surname}
                   </p>
                   {showUserMenu && (
                     <div className={styles.userActions} ref={userMenuRef}>
@@ -573,7 +573,7 @@ const TechDepo = ({scrollRef}) => {
                 </div>
               ) : (
                 <div className={styles.guestPanel}>
-                  {TechInfoF.isGuest && (
+                  {TechDepoInfoF.isGuest && (
                     <p className={styles.guestLabel}>
                       <img src="/avatars/guest-user.png" alt="guest" /> Misafir
                     </p>
@@ -634,7 +634,7 @@ const TechDepo = ({scrollRef}) => {
             </p>
             <button
               onClick={() => {
-                if (!TechInfoF.isLoggedIn && TechInfoF.isGuest === null) {
+                if (!TechDepoInfoF.isLoggedIn && TechDepoInfoF.isGuest === null) {
                   setPage("authChoice"); // kullanıcı daha önce seçim yapmamışsa
                 } else {
                   secureSetPage("payment");
@@ -686,7 +686,7 @@ const TechDepo = ({scrollRef}) => {
             <button
               className={styles.guestButton}
               onClick={() => {
-                setTechInfoF(prev => ({
+                setTechDepoInfoF(prev => ({
                   ...prev,
                   isLoggedIn: false,
                   isGuest: true ,
@@ -701,7 +701,7 @@ const TechDepo = ({scrollRef}) => {
             <button
               className={styles.loginButton}
               onClick={() => {
-                setTechInfoF(prev => ({
+                setTechDepoInfoF(prev => ({
                   ...prev,
                   isGuest: false
                 }));
@@ -715,7 +715,7 @@ const TechDepo = ({scrollRef}) => {
       )}
 
       {/* TechDepoF giriş/kayıt olma sayfası */}
-      {page === "login" && !TechInfoF.isLoggedIn && (
+      {page === "login" && !TechDepoInfoF.isLoggedIn && (
         <div className={styles.loginForm}>           
           <h2>{isLogin ? "Giriş Yap" : "Kayıt Ol"}</h2>
           {!isLogin && (
@@ -764,20 +764,20 @@ const TechDepo = ({scrollRef}) => {
               <label>E-mail :</label>
               <input type="text" placeholder="E-posta adresiniz" value={email} readOnly/>
               <label>Ad Soyad :</label>
-              <input type="text" placeholder="Adınız Soyadınız" value={`${TechInfoF.name} ${TechInfoF.surname}`} readOnly />
+              <input type="text" placeholder="Adınız Soyadınız" value={`${TechDepoInfoF.name} ${TechDepoInfoF.surname}`} readOnly />
               <label>Telefon Numarası :</label>
-              <input type="text" placeholder="Telefon Numaranız" value={TechInfoF.phone} readOnly />
+              <input type="text" placeholder="Telefon Numaranız" value={TechDepoInfoF.phone} readOnly />
               <label>Adres :</label>
-              <input type="text" placeholder="Adres" value={TechInfoF.adres} readOnly />
+              <input type="text" placeholder="Adres" value={TechDepoInfoF.adres} readOnly />
               <label>TC Kimlik Numarası :</label>
               <input
                 type="text"
                 placeholder="TC No"
-                value={TechInfoF.tckn || ""}
+                value={TechDepoInfoF.tckn || ""}
                 onChange={(e) => {
                     const value = e.target.value;
                     if (/^\d*$/.test(value)) { // sadece sayılar
-                    setTechInfoF(prev => ({ ...prev, tckn: value }));
+                    setTechDepoInfoF(prev => ({ ...prev, tckn: value }));
                     }
                 }}
                 maxLength={11}
@@ -789,8 +789,8 @@ const TechDepo = ({scrollRef}) => {
               <input
                 type="date"
                 placeholder="GG/AA/YYYY"
-                value={TechInfoF.birthDate || ""}
-                onChange={(e) => setTechInfoF(prev => ({ ...prev, birthDate: e.target.value }))}
+                value={TechDepoInfoF.birthDate || ""}
+                onChange={(e) => setTechDepoInfoF(prev => ({ ...prev, birthDate: e.target.value }))}
               />
               {errors.birthDate && <p ref={errorRef} className={styles.errorMessage}>{errors.birthDate}</p>}
 
@@ -799,11 +799,11 @@ const TechDepo = ({scrollRef}) => {
                 type="text"
                 placeholder="A"
                 maxLength={1}
-                value={TechInfoF.motherMaiden || ""}
+                value={TechDepoInfoF.motherMaiden || ""}
                 onChange={(e) => {
                     const value = e.target.value;
                     if (/^[a-zA-ZğüşıöçĞÜŞİÖÇ]?$/.test(value)) {
-                    setTechInfoF(prev => ({ ...prev, motherMaiden: value }));
+                    setTechDepoInfoF(prev => ({ ...prev, motherMaiden: value }));
                     }
                 }}
                 inputMode="text"
@@ -867,9 +867,9 @@ const TechDepo = ({scrollRef}) => {
                 <label>
                     <input
                     type="checkbox"
-                    checked={TechInfoF.acceptedPreApprovedLoan}
+                    checked={TechDepoInfoF.acceptedPreApprovedLoan}
                     onChange={(e) =>
-                        setTechInfoF((prev) => ({ ...prev, acceptedPreApprovedLoan: e.target.checked }))
+                        setTechDepoInfoF((prev) => ({ ...prev, acceptedPreApprovedLoan: e.target.checked }))
                     }
                     />
                     <p>TC ve doğum tarihinize göre size özel %10 indirim fırsatını değerlendirmek istiyorum.</p>
@@ -909,14 +909,14 @@ const TechDepo = ({scrollRef}) => {
                   onChange={(e) => setCVV(e.target.value)}
                 />
                 </div>
-                {TechInfoF.isLoggedIn && TechInfoF.savedCard && (
+                {TechDepoInfoF.isLoggedIn && TechDepoInfoF.savedCard && (
                   <button
                     type="button"
                     className={styles.fillSavedCardButton}
                     onClick={() => {
-                      setCardNumber(TechInfoF.cardNumber);
-                      setCardName(TechInfoF.cardName);
-                      setExpiryDate(TechInfoF.cardExpiryDate);
+                      setCardNumber(TechDepoInfoF.cardNumber);
+                      setCardName(TechDepoInfoF.cardName);
+                      setExpiryDate(TechDepoInfoF.cardExpiryDate);
                       // CVV boş bırakılacak
                       setCVV("");
                     }}
@@ -955,9 +955,9 @@ const TechDepo = ({scrollRef}) => {
               <label className={styles.checkboxLabel}>
                 <input
                     type="checkbox"
-                    checked={TechInfoF.acceptedCampaignTerms}
+                    checked={TechDepoInfoF.acceptedCampaignTerms}
                     onChange={(e) =>
-                    setTechInfoF(prev => ({ ...prev, acceptedCampaignTerms: e.target.checked }))
+                    setTechDepoInfoF(prev => ({ ...prev, acceptedCampaignTerms: e.target.checked }))
                     }
                 />
                 <p><b>Kampanya Katılım Şartlarını</b> okudum ve onaylıyorum.</p>
@@ -976,8 +976,8 @@ const TechDepo = ({scrollRef}) => {
           {/* Sağ taraf - Ürün Bilgileri */}
           <div className={styles.paymentRight}>
             <div className={styles.userSummaryBox}>
-              <p>👤 Kullanıcı: {TechInfoF.isLoggedIn ? `${TechInfoF.name} ${TechInfoF.surname}` : "Misafir Kullanıcı"}</p>
-              {!TechInfoF.isLoggedIn && (
+              <p>👤 Kullanıcı: {TechDepoInfoF.isLoggedIn ? `${TechDepoInfoF.name} ${TechDepoInfoF.surname}` : "Misafir Kullanıcı"}</p>
+              {!TechDepoInfoF.isLoggedIn && (
                 <button
                   className={styles.loginSmallButton}
                   onClick={() => setPage("login")}
@@ -1062,7 +1062,7 @@ const TechDepo = ({scrollRef}) => {
                   <input value={email} disabled />
 
                   <strong>Telefon:</strong>
-                  <input value={TechInfoF.phone} disabled />
+                  <input value={TechDepoInfoF.phone} disabled />
 
                   <button
                     onClick={handleEdit}
@@ -1100,11 +1100,11 @@ const TechDepo = ({scrollRef}) => {
             {subPage === "cards" && (
               <div>
                 <h2>Kayıtlı Kartlarım</h2>
-                {TechInfoF.savedCard ? (
+                {TechDepoInfoF.savedCard ? (
                   <div className={styles.savedCard}>
-                    <p>💳 Kart Numarası: {maskCardNumber(TechInfoF.cardNumber)}</p>
-                    <p>👤 Kart Sahibi: {TechInfoF.cardName}</p>
-                    <p>📅 Son Kullanma Tarihi: {TechInfoF.cardExpiryDate}</p>
+                    <p>💳 Kart Numarası: {maskCardNumber(TechDepoInfoF.cardNumber)}</p>
+                    <p>👤 Kart Sahibi: {TechDepoInfoF.cardName}</p>
+                    <p>📅 Son Kullanma Tarihi: {TechDepoInfoF.cardExpiryDate}</p>
                   </div>
                 ) : (
                   <p style={{color: "black"}}>💳 Henüz kart eklenmemiş.</p>

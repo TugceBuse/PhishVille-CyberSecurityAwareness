@@ -4,16 +4,23 @@ import { useGameContext } from "../../Contexts/GameContext";
 import { usePhoneContext } from "../../Contexts/PhoneContext";
 import { useQuestManager } from "../../Contexts/QuestManager";
 import { useEventLog } from "../../Contexts/EventLogContext";
+import { useMailContext } from "../../Contexts/MailContext";
+import { createResetPasswordMail } from "../Mailbox/Mails"; 
+import { useTimeContext } from "../../Contexts/TimeContext";
 
 const SkillForgeHub = () => {
   const { SkillForgeHubInfo, setSkillForgeHubInfo } = useGameContext();
   const { addEventLog, addEventLogOnChange } = useEventLog();
   const { completeQuest } = useQuestManager();
+  const { sendMail } = useMailContext(); 
+  const { secondsRef } = useTimeContext();
 
   const { generateCodeMessage, lastCodes, clearCode } = usePhoneContext();
 
   const [codeTimer, setCodeTimer] = useState(120);
-  const [attemptsLeft, setAttemptsLeft] = useState(3);
+
+  const [page, setPage] = useState("login"); // mevcut değerler: login, forgot
+
   const [lockMessage, setLockMessage] = useState("");
   const [is2FAwaiting, setIs2FAwaiting] = useState(false);
   const [twoFACodeInput, setTwoFACodeInput] = useState("");
@@ -27,6 +34,7 @@ const SkillForgeHub = () => {
   const [successPassword, setSuccessPassword] = useState("");
   const [showSettings, setShowSettings] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const isPasswordStrongEnough = (password) =>
     /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&._-]).{8,}$/.test(password);
@@ -205,7 +213,8 @@ const SkillForgeHub = () => {
     setNewPassword("");
     setSuccessPassword("");
     setShowSettings(false);
-    setIsLogin("Giriş Yap");
+    setIsLogin(true);
+    setPage("login");
   };
 
   const toggle2FA = () => {
@@ -234,36 +243,77 @@ const SkillForgeHub = () => {
     );
   };
 
-  const handlePasswordUpdate = () => {
-    if (!newPassword) return;
+    const handlePasswordUpdate = () => {
+      if (!newPassword) return;
 
-    if (newPassword.length < 4) {
-        showTemporaryError("Şifre en az 4 karakter olmalıdır!");
-        return;
-    }
-
-    const strong = isPasswordStrongEnough(newPassword);
-    setSkillForgeHubInfo({
-      ...SkillForgeHubInfo,
-      password: newPassword,
-      isPasswordStrong: strong,
-    });
-
-    addEventLog({
-      type: "update_password",
-      questId: "register_career_site",
-      logEventType: "update",
-      value: passwordStrong ? 1 : -1,
-      data: 
-      {
-        for: "SkillForgeHub",
-        isStrong: passwordStrong,
+      if (newPassword.length < 4) {
+          showTemporaryError("Şifre en az 4 karakter olmalıdır!");
+          return;
       }
-    });
-    setSuccessPassword("Şifreniz başarıyla güncellendi!");
-    setNewPassword("");
-    setTimeout(() => setSuccessPassword(""), 2000);
-  };
+
+      const strong = isPasswordStrongEnough(newPassword);
+        setSkillForgeHubInfo({
+          ...SkillForgeHubInfo,
+          password: newPassword,
+          isPasswordStrong: strong,
+        });
+
+        addEventLog({
+          type: "update_password",
+          questId: "register_career_site",
+          logEventType: "update",
+          value: passwordStrong ? 1 : -1,
+          data: 
+          {
+            for: "SkillForgeHub",
+            isStrong: passwordStrong,
+          }
+        });
+        setSuccessPassword("Şifreniz başarıyla güncellendi!");
+        setNewPassword("");
+        setTimeout(() => setSuccessPassword(""), 2000);
+    };
+
+    const handlePasswordReset = () => {
+       if (!SkillForgeHubInfo.isRegistered || SkillForgeHubInfo.email !== email) {
+        setPage("login");
+        setErrorMessage("Bu e-posta ile kayıtlı bir hesap bulunmamaktadır.");
+        setTimeout(() => setErrorMessage(""), 2000);
+        return;
+      }
+  
+      if (!email || !email.includes("@")) {
+        setErrorMessage("Lütfen geçerli bir e-posta adresi girin.");
+        setTimeout(() => setErrorMessage(""), 2000);
+        return;
+      }
+  
+      const expireAt = (secondsRef?.current || 0) + 60; // 10 dk = 600 sn
+  
+      // Mail gönder
+      sendMail("resetPassword", {
+        from: "skillforgehub@support.com",
+        title: "Şifre Sıfırlama Talebi",
+        precontent: "Şifrenizi sıfırlamak için bu e-postayı inceleyin.",
+        content: createResetPasswordMail({
+          email,
+          site: "skillforgehub",
+          siteDisplayName: "SkillForgeHub",
+          from: { id: 1010 },
+          expireAt,
+        })
+      });
+  
+      setSuccessMessage("Şifre sıfırlama bağlantısı e-posta kutunuza gönderildi.");
+      // 2 saniye sonra otomatik temizle
+      setTimeout(() => {
+        setSuccessMessage("");
+        setIsLoginOpen(false); // başarı mesajı gösterildikten sonra kapat
+        setIsLogin(true);
+        setPage("login"); // geri resetle
+      }, 2000);
+      
+    };
 
   return (
     <div className={styles.skillPageWrapper}>
@@ -352,68 +402,101 @@ const SkillForgeHub = () => {
 
         {!SkillForgeHubInfo.isLoggedIn && isLoginOpen && !is2FAwaiting && (
           <div className={`${styles.authBox} ${styles.active}`}>
-            <h2>{isLogin ? "Giriş Yap" : "Kayıt Ol"}</h2>
-
-            {!isLogin && (
+            {page === "forgot" ? (
               <>
+                <h2 className={styles.forgotTitle}>🔐 Şifremi Unuttum</h2>
+                <p className={styles.forgotInfo}>
+                  Kayıtlı e-posta adresinizi girin. Size bir şifre sıfırlama bağlantısı gönderilecektir.
+                </p>
+
                 <input
-                  type="text"
-                  placeholder="Ad"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  className={styles.forgotInput}
+                  type="email"
+                  placeholder="E-posta adresiniz"
+                  readOnly
+                  value={email}
                 />
+                {successMessage && <p className={styles.successMessage}>{successMessage}</p>}
+                <div className={styles.forgotButtonGroup}>
+                  <button className={styles.forgotButton} onClick={handlePasswordReset}>
+                    Gönder
+                  </button>
+                  <button className={styles.forgotBackButton} onClick={() => setPage("login")}>
+                    Geri Dön
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2>{isLogin ? "Giriş Yap" : "Kayıt Ol"}</h2>
+
+                {!isLogin && (
+                  <>
+                    <input
+                      type="text"
+                      placeholder="Ad"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Soyad"
+                      value={surname}
+                      onChange={(e) => setSurname(e.target.value)}
+                    />
+                  </>
+                )}
+
+                <input type="email" value={SkillForgeHubInfo.email} disabled />
                 <input
-                  type="text"
-                  placeholder="Soyad"
-                  value={surname}
-                  onChange={(e) => setSurname(e.target.value)}
+                  type="password"
+                  placeholder="Şifreniz"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
+                <button onClick={handleAuth} disabled={isLogin && SkillForgeHubInfo.lockoutUntil && Date.now() < SkillForgeHubInfo.lockoutUntil}>
+                  {isLogin ? "Giriş Yap" : "Kayıt Ol"}
+                </button>
+
+                {SkillForgeHubInfo.lockoutUntil && Date.now() < SkillForgeHubInfo.lockoutUntil && isLogin && (
+                  <p className={styles.twoFAError}>
+                    🚫 Çok fazla deneme yapıldı. <b>{getLockoutRemainingMinutes()}</b> dakika sonra tekrar deneyin.
+                  </p>
+                )}
+
+                {errorMessage && (
+                  <span className={styles.errorMessage}>{errorMessage}</span>
+                )}
+
+                <p className={styles.authBoxText} onClick={() => setIsLogin(!isLogin)}>
+                  {isLogin
+                    ? "Hesabınız yok mu? Kayıt olun!"
+                    : "Zaten üye misiniz? Giriş yapın!"}
+                </p>
+
+                {isLogin && (
+                  <button
+                    className={styles.forgotPasswordButton}
+                    type="button"
+                    onClick={() => setPage("forgot")}
+                  >
+                    🔐 Şifremi Unuttum
+                  </button>
+                )}
               </>
             )}
-
-            <input type="email" value={SkillForgeHubInfo.email} disabled />
-            <input
-              type="password"
-              placeholder="Şifreniz"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <button onClick={handleAuth} disabled={isLogin &&   SkillForgeHubInfo.lockoutUntil && Date.now() < SkillForgeHubInfo.lockoutUntil}>
-              {isLogin ? "Giriş Yap" : "Kayıt Ol"}
-            </button>
-
-            {SkillForgeHubInfo.lockoutUntil && Date.now() < SkillForgeHubInfo.lockoutUntil && isLogin && (
-              <p className={styles.twoFAError}>
-                🚫 Çok fazla deneme yapıldı. <b>{getLockoutRemainingMinutes()}</b> dakika sonra tekrar deneyin.
-              </p>
-            )}
-
-            {errorMessage && (
-              <span className={styles.errorMessage}>{errorMessage}</span>
-            )}
-
-            <p
-              className={styles.authBoxText}
-              onClick={() => setIsLogin(!isLogin)}
-            >
-              {isLogin
-                ? "Hesabınız yok mu? Kayıt olun!"
-                : "Zaten üye misiniz? Giriş yapın!"}
-            </p>
-            <p 
-              style={{ cursor: "context-menu", color: "#258cff", marginTop: 6, textDecoration: "underline", marginBottom: 6 }}
-            >
-              Şifremi Unuttum
-            </p>
-            <button 
+            <button
               onClick={() => {
-                setIsLoginOpen(false); 
+                setIsLoginOpen(false);
                 setIsLogin(true);
-              }}>
+                setPage("login"); // geri resetle
+              }}
+            >
               Kapat
             </button>
           </div>
         )}
+
 
         {!SkillForgeHubInfo.isLoggedIn && is2FAwaiting && (
           <div className={`${styles.authBox} ${styles.active}`}>

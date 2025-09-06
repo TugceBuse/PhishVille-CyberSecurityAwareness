@@ -146,7 +146,7 @@ export const GameContextProvider = ({ children }) => {
       name: constUser.firstName,
       surname: constUser.lastName,
     }));
-    setTechInfo(prev => ({
+    setTechDepoInfo(prev => ({
       ...prev,
       email: constUser.email,
       phone: constUser.phone,
@@ -158,7 +158,7 @@ export const GameContextProvider = ({ children }) => {
       cardCVV: constUser.cardCVV,
       adres: constUser.adres,
     }));
-    setTechInfoF(prev => ({
+    setTechDepoInfoF(prev => ({
       ...prev,
       email: constUser.email,
       phone: constUser.phone,
@@ -170,7 +170,7 @@ export const GameContextProvider = ({ children }) => {
       cardCVV: constUser.cardCVV,
       adres: constUser.adres,
     }));
-    setCloudUser(prev => ({
+    setCloudBoxInfo(prev => ({
       ...prev,
       email: constUser.email,
       name: constUser.firstName,
@@ -229,7 +229,7 @@ export const GameContextProvider = ({ children }) => {
   });
 
   const [orders, setOrders] = useState([]);
-  const [TechInfo, setTechInfo] = useState({
+  const [TechDepoInfo, setTechDepoInfo] = useState({
     name: '',
     surname: '',
     email: constUser.email,
@@ -272,7 +272,7 @@ export const GameContextProvider = ({ children }) => {
     ));
   };
 
-  const [TechInfoF, setTechInfoF] = useState({
+  const [TechDepoInfoF, setTechDepoInfoF] = useState({
     name: '',
     surname: '',
     email: constUser.email,
@@ -314,7 +314,7 @@ export const GameContextProvider = ({ children }) => {
   });
 
   // CloudBox
-  const [cloudUser, setCloudUser] = useState({
+  const [CloudBoxInfo, setCloudBoxInfo] = useState({
     name: '',
     surname: '',
     email: constUser.email,
@@ -385,7 +385,7 @@ export const GameContextProvider = ({ children }) => {
       ) {
         sendMail("cargo", {
           mailId: 101,
-          name: `${TechInfo.name} ${TechInfo.surname}`,
+          name: `${TechDepoInfo.name} ${TechDepoInfo.surname}`,
           productName: order.items.map(item => item.name).join(", "),
           trackingNo: order.trackingNo,
           shippingCompany: order.shipping,
@@ -416,7 +416,7 @@ export const GameContextProvider = ({ children }) => {
         }
       }
     });
-  }, [orders, sendMail, TechInfo, addCargoTracking, setOrders]);
+  }, [orders, sendMail, TechDepoInfo, addCargoTracking, setOrders]);
 
   // Wifi bağlanınca ilk mailleri gönder (kendi fonksiyonunu bozmadan)
   useEffect(() => {
@@ -509,17 +509,17 @@ export const GameContextProvider = ({ children }) => {
         ProCareerHubInfo, setProCareerHubInfo,
         SkillForgeHubInfo, setSkillForgeHubInfo,
         PostifyInfo, setPostifyInfo,
-        TechInfo, setTechInfo,
+        TechDepoInfo, setTechDepoInfo,
         cargoTrackingList, setCargoTrackingList,
         addCargoTracking,
         updateCargoStep,
-        TechInfoF, setTechInfoF,
+        TechDepoInfoF, setTechDepoInfoF,
         orders, setOrders,
         productInfo, setProductInfo,
         constUser,
         BankInfo, setBankInfo,
         openlitePermissions, setOpenlitePermissions,
-        cloudUser, setCloudUser,
+        CloudBoxInfo, setCloudBoxInfo,
         cloudBoxBackup, setCloudBoxBackup,
         openDropPublicFiles, setOpenDropPublicFiles,
         cardBalance, setCardBalance,

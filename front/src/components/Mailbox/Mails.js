@@ -1,14 +1,16 @@
 import './Mailbox.css';
 import DownloadButton from '../../utils/DownloadButton';
 import LinkButton from '../../utils/LinkButton';
+import { useTimeContext } from '../../Contexts/TimeContext';
 
 export function createResetPasswordMail({
   email,
   site = "procareerhub",
   siteDisplayName = "ProCareerHub",
-  from
+  from,
+  expireAt,
 }) {
-  const url = `http://reset/${site}?email=${encodeURIComponent(email)}`;
+  const url = `http://reset/${site}?email=${encodeURIComponent(email)}&expire=${encodeURIComponent(expireAt)}`;
 
   return (
     <div className="mail-content">

@@ -436,14 +436,14 @@ const sites = {
   isSponsored: true,
   seoScore: 7
 },
-"^http://reset/([a-zA-Z0-9-]+)\\?email=.*$": {
-  title: "Şifre Sıfırlama",
-  type: "component",
-  component: "ResetPassword",
-  statement: "Yeni şifrenizi belirleyin.",
-  clickable: true,
-  protocol: "http"
-},
+"^http://reset/([a-zA-Z0-9-]+)\\?email=[^&]+(&.*)?$": {
+  "title": "Şifre Sıfırlama",
+  "type": "component",
+  "component": "ResetPassword",
+  "statement": "Yeni şifrenizi belirleyin.",
+  "clickable": true,
+  "protocol": "http"
+}
 };
 
 export default sites;

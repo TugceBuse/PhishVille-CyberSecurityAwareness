@@ -6,6 +6,8 @@ import { useQuestManager } from "../../Contexts/QuestManager";
 import  {useEventLog } from "../../Contexts/EventLogContext";
 import { useMailContext } from "../../Contexts/MailContext";
 import { createResetPasswordMail } from "../Mailbox/Mails"; 
+import { useTimeContext } from "../../Contexts/TimeContext";
+
 
 const ProCareerHub = () => {
 
@@ -13,10 +15,9 @@ const ProCareerHub = () => {
   const { addEventLog, addEventLogOnChange } = useEventLog();
   const { completeQuest } = useQuestManager();
   const { sendMail } = useMailContext(); 
+  const { secondsRef } = useTimeContext();
 
   const [page, setPage] = useState("login"); // mevcut değerler: login, forgot
-  const [resetEmail, setResetEmail] = useState("");
-  const [resetCodeSent, setResetCodeSent] = useState(false);
 
   const [isLogin, setIsLogin] = useState(true);
   const { generateCodeMessage, lastCodes, clearCode } = usePhoneContext();
@@ -55,8 +56,7 @@ const ProCareerHub = () => {
       return;
     }
 
-    // Şifre sıfırlama bağlantısını oluştur
-    const resetLink = `https://procareerhub.com/reset?email=${encodeURIComponent(email)}`;
+    const expireAt = (secondsRef?.current || 0) + 60; // 10 dk = 600 sn
 
     // Mail gönder
     sendMail("resetPassword", {
@@ -67,7 +67,8 @@ const ProCareerHub = () => {
         email,
         site: "procareerhub",
         siteDisplayName: "ProCareerHub",
-        from: { id: 1009 }
+        from: { id: 1009 },
+        expireAt,
       })
     });
 
