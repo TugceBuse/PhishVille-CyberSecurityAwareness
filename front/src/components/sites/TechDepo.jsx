@@ -7,220 +7,17 @@ import { useChatContext } from '../../Contexts/ChatContext';
 import { statusSteps } from "../../utils/cargoStatus";
 import { useTimeContext } from "../../Contexts/TimeContext";
 import { useQuestManager } from "../../Contexts/QuestManager";
-
-const cards = [
-  {
-    id: 1,
-    name: "UltraBook X200",
-    price: "22999",
-    image: "/techDepo/computer1.jpg",
-    description: "Yüksek performanslı, taşınabilir iş bilgisayarı.",
-    seller: "TechDepo Bilgisayar",
-    comments: [
-      "Gerçekten çok hızlı, özellikle yazılım geliştirme için mükemmel.",
-      "Klavye biraz küçük ama taşınabilirlik harika."
-    ]
-  },
-  {
-    id: 2,
-    name: "LiteBook 14 Laptop",
-    price: "18499",
-    image: "/techDepo/computer2.jpg",
-    description: "Hafif ve taşınabilir yapısıyla günlük işler için ideal laptop.",
-    seller: "Dijitek",
-    comments: [
-      "Ofis işleri için yeterli, taşımak çok kolay.",
-      "Ekran parlaklığı biraz düşük ama f/p ürünü."
-    ]
-  },
-  {
-    id: 3,
-    name: "SilentClick Mouse",
-    price: "319",
-    image: "/techDepo/mouse1.jpg",
-    description: "Sessiz tıklama özelliğiyle ofis kullanımı için ideal ergonomik fare.",
-    seller: "MouseLine Teknoloji",
-    comments: [
-      "Sessiz çalışıyor, iş yerinde çok işe yarıyor.",
-      "Tıklama hissi yumuşak ama alışmak zaman aldı."
-    ]
-  },
-  {
-    id: 4,
-    name: "NeonMouse RGB",
-    price: "479",
-    image: "/techDepo/mouse2.jpg",
-    description: "RGB aydınlatmalı, yüksek hassasiyetli oyuncu faresi.",
-    seller: "GamerX Donanım",
-    comments: [
-      "FPS oyunları için çok iyi, ışıkları da çok şık.",
-      "Tuş konumu biraz alışılmışın dışında ama güzel."
-    ]
-  },
-  {
-    id: 5,
-    name: "DeepSound Kulaklık",
-    price: "689",
-    image: "/techDepo/head1.jpg",
-    description: "Gelişmiş mikrofonlu, kulak çevreleyen tasarım.",
-    seller: "SesUzmanı Elektronik",
-    comments: [
-      "Mikrofon kalitesi çok iyi, toplantılar için birebir.",
-      "Kulak yastıkları rahat ama biraz sıcak tutuyor."
-    ]
-  },
-  {
-    id: 6,
-    name: "Compact Bass Kulaklık",
-    price: "729",
-    image: "/techDepo/head2.jpg",
-    description: "Kablosuz bağlantılı, yüksek bas destekli kulaklık.",
-    seller: "TechDepo Kulaklık",
-    comments: [
-      "Bluetooth bağlantısı stabil.",
-      "Baslar oldukça güçlü, müzik keyfi yüksek."
-    ]
-  },
-  {
-    id: 7,
-    name: "SlimBook i7 Laptop",
-    price: "26499",
-    image: "/techDepo/computer3.jpg",
-    description: "Gün boyu pil ömrü sunan ultra ince dizüstü bilgisayar.",
-    seller: "NotebookCenter",
-    comments: [
-      "Şarjı uzun gidiyor, performansı da çok iyi.",
-      "Fan sesi neredeyse yok, çok sessiz çalışıyor."
-    ]
-  },
-  {
-    id: 8,
-    name: "OfficeMate Laptop",
-    price: "17999",
-    image: "/techDepo/computer4.jpg",
-    description: "Günlük kullanım ve ofis işleri için ideal laptop.",
-    seller: "TechDepo Resmi Satıcısı",
-    comments: [
-      "Fiyatına göre başarılı.",
-      "Klavyesi ergonomik ama ekran yansımalı."
-    ]
-  },
-  {
-    id: 9,
-    name: "Surround Kulaklık",
-    price: "899",
-    image: "/techDepo/head3.jpg",
-    description: "7.1 surround destekli oyun kulaklığı.",
-    seller: "SesMaster",
-    comments: [
-      "Oyunlarda ses yönü harika.",
-      "Kablo biraz uzun ama sağlam."
-    ]
-  },
-  {
-    id: 10,
-    name: "FlexFit Kulaklık",
-    price: "599",
-    image: "/techDepo/head4.jpg",
-    description: "Katlanabilir, hafif yapıda taşınabilir kulaklık.",
-    seller: "Mobil Aksesuarlar",
-    comments: [
-      "Katlanabilir oluşu çantada taşıma açısından çok avantajlı.",
-      "Ses kalitesi fiyatına göre iyi."
-    ]
-  },
-  {
-    id: 11,
-    name: "ProRGB Klavye",
-    price: "749",
-    image: "/techDepo/key3.jpg",
-    description: "RGB aydınlatmalı sessiz tuşlu klavye.",
-    seller: "GameType",
-    comments: [
-      "Tuşlar sessiz, RGB çok canlı.",
-      "Malzeme kalitesi harika."
-    ]
-  },
-  {
-    id: 12,
-    name: "SilentBoard Klavye",
-    price: "599",
-    image: "/techDepo/key4.jpg",
-    description: "Geceleri sessiz çalışma için optimize edilmiş klavye.",
-    seller: "OfisPlus",
-    comments: [
-      "Tuş sesi neredeyse yok, gece rahatça kullanılıyor.",
-      "Tuşlar yumuşak ve ergonomik."
-    ]
-  },
-  {
-    id: 13,
-    name: "QuickMouse Lite",
-    price: "289",
-    image: "/techDepo/mouse3.jpg",
-    description: "Kompakt ve ergonomik kablosuz fare.",
-    seller: "MouseLine Teknoloji",
-    comments: [
-      "Küçük boyutu sayesinde rahat taşınıyor.",
-      "Pil ömrü çok uzun."
-    ]
-  },
-  {
-    id: 14,
-    name: "ErgoMouse X",
-    price: "449",
-    image: "/techDepo/mouse4.jpg",
-    description: "Elde kaymayı önleyen özel yüzeye sahip fare.",
-    seller: "TechDepo Donanım",
-    comments: [
-      "Kaymaz yüzeyi gerçekten etkili.",
-      "Uzun süreli kullanımda bile el yormuyor."
-    ]
-  },
-  {
-    id: 15,
-    name: "JetPrint 220 Yazıcı",
-    price: "4899",
-    image: "/techDepo/printer1.jpg",
-    description: "Renkli baskı destekli çok işlevli yazıcı.",
-    seller: "BaskıMarket",
-    comments: [
-      "Kurulumu kolay, yazıcı hızı yeterli.",
-      "WiFi özelliği çok pratik."
-    ]
-  },
-  {
-    id: 16,
-    name: "TabOne 10.1\" Tablet",
-    price: "5499",
-    image: "/techDepo/tablet1.jpg",
-    description: "Geniş ekranlı, uzun pil ömürlü Android tablet.",
-    seller: "MobilTek",
-    comments: [
-      "Ekranı çok net, dersler için aldım gayet yeterli.",
-      "Bataryası uzun süre gidiyor."
-    ]
-  },
-  {
-    id: 17,
-    name: "EduTab 8\" Tablet",
-    price: "3199",
-    image: "/techDepo/tablet2.jpg",
-    description: "Öğrenciler için optimize edilmiş taşınabilir tablet.",
-    seller: "EduTeknoloji",
-    comments: [
-      "Çocuğum için aldım, çok memnunuz.",
-      "Ders videoları ve temel uygulamalar için ideal."
-    ]
-  }
-];
-
+import { useEventLog } from "../../Contexts/EventLogContext";
+import { createResetPasswordMail } from "../Mailbox/Mails"; 
+import cardsData from "../../constants/cards";
+const cards = cardsData.cards;
 
 const TechDepo = ({scrollRef}) => {
-  const { TechInfo, setTechInfo, cardBalance, setCardBalance, orders, setOrders, cargoTrackingList, addCargoTracking, secondsRef } = useGameContext();
+  const { TechDepoInfo, setTechDepoInfo, cardBalance, setCardBalance, orders, setOrders, cargoTrackingList, addCargoTracking, secondsRef } = useGameContext();
   const { gameDate } = useTimeContext();
   const { sendMail } = useMailContext();
   const { completeQuest } = useQuestManager();
+  const { addEventLog } = useEventLog();
   const [productInfo, setProductInfo] = useState({
     productIDs: []
   });
@@ -248,27 +45,26 @@ const TechDepo = ({scrollRef}) => {
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   
-  const email = TechInfo.email;
+  const email = TechDepoInfo.email;
 
   const [password, setPassword] = useState("");
   const isPasswordStrongEnough = (password) => {
     return /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&._-]).{8,}$/.test(password);
   };
   const passwordStrong = isPasswordStrongEnough(password);
-  const [newPassword, setNewPassword] = useState("");
-  const [successPassword, setSuccessPassword] = useState("");
 
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const errorRef = useRef(null);
 
   useEffect(() => {
-    if(!TechInfo.isLoggedIn) {
+    if(!TechDepoInfo.isLoggedIn) {
         setName("");
         setSurname("");
         setPassword("");
         showTemporaryError("");
     } 
-  }, [TechInfo.isLoggedIn]);
+  }, [TechDepoInfo.isLoggedIn]);
 
   useEffect(() => {
     scrollRef?.current?.scrollTo?.({ top: 0, behavior: "auto" });
@@ -290,14 +86,14 @@ const TechDepo = ({scrollRef}) => {
 
   // 2FA kısıtlama bitimi kod girişimlerini sıfırlar
   useEffect(() => {
-    if (TechInfo.lockoutUntil && Date.now() >= TechInfo.lockoutUntil) {
-      setTechInfo(prev => ({
+    if (TechDepoInfo.lockoutUntil && Date.now() >= TechDepoInfo.lockoutUntil) {
+      setTechDepoInfo(prev => ({
         ...prev,
         lockoutUntil: null,
         loginAttempts: 0,
       }));
     }
-  }, [TechInfo.lockoutUntil]);
+  }, [TechDepoInfo.lockoutUntil]);
 
   // 🕐 Kod sayacı
   useEffect(() => {
@@ -353,20 +149,20 @@ const TechDepo = ({scrollRef}) => {
     setErrorMessage(msg);
     setTimeout(() => {
       showTemporaryError("");
-    }, 2000);
+    }, 3000);
   };
 
   // 2FA kodu gönderme süresi
   const getLockoutRemainingMinutes = () => {
-    if (!TechInfo.lockoutUntil) return 0;
-    const diff = TechInfo.lockoutUntil - Date.now();
+    if (!TechDepoInfo.lockoutUntil) return 0;
+    const diff = TechDepoInfo.lockoutUntil - Date.now();
     return diff > 0 ? Math.ceil(diff / 60000) : 0;
   };
 
   const handleAuth = () => {
   
     if (!isLogin) {
-      if (TechInfo.isRegistered && TechInfo.email === email) {
+      if (TechDepoInfo.isRegistered && TechDepoInfo.email === email) {
         showTemporaryError("Bu e-posta adresi ile zaten bir hesap oluşturulmuş!");
         return;
       }
@@ -380,8 +176,8 @@ const TechDepo = ({scrollRef}) => {
         return;
       }
 
-      setTechInfo({
-        ...TechInfo,
+      setTechDepoInfo({
+        ...TechDepoInfo,
         name,
         surname,
         password,
@@ -391,29 +187,48 @@ const TechDepo = ({scrollRef}) => {
         isLoggedIn: true,
         isPasswordStrong: passwordStrong,
       });
-      showTemporaryError("");
+      addEventLog({
+        type: "register_techdepo",
+        questId: "buy_printer",
+        logEventType: "register",
+        value: passwordStrong ? 5 : -5,
+        data: 
+        {
+          for: "TechDepo",
+          isStrong: passwordStrong,
+        }
+      });
     } else {
-      if (!TechInfo.isRegistered || TechInfo.email !== email) {
+      if (!TechDepoInfo.isRegistered || TechDepoInfo.email !== email) {
         showTemporaryError("Bu e-posta ile kayıtlı bir hesap bulunmamaktadır.");
         return;
       }
-      if (!password || password !== TechInfo.password) {
+      if (!password || password !== TechDepoInfo.password) {
         showTemporaryError("Hatalı şifre! Lütfen tekrar deneyin.");
         return;
       }
 
-       if (TechInfo.is2FAEnabled) {
+       if (TechDepoInfo.is2FAEnabled) {
         generateCodeMessage("TechDepo", "techdepo");
         setIs2FAwaiting(true);
         return;
       }
 
-  
-      setTechInfo({
-        ...TechInfo,
+      setTechDepoInfo({
+        ...TechDepoInfo,
         isLoggedIn: true,
       });
-      showTemporaryError("");
+      addEventLog({
+        type: "login_techdepo",
+        questId: "buy_printer",
+        logEventType: "login",
+        value: 0,
+        data: 
+        {
+          to: "TechDepo",
+          password: password,
+        }
+      });
     }
   
     setPage("welcome");
@@ -427,8 +242,8 @@ const TechDepo = ({scrollRef}) => {
   }, []);
 
   const handleLogout = () => {
-    setTechInfo({
-      ...TechInfo,
+    setTechDepoInfo({
+      ...TechDepoInfo,
       isLoggedIn: false,
     });
     setName("");
@@ -587,7 +402,7 @@ const TechDepo = ({scrollRef}) => {
 //       !order.cargoMailSent
 //     ) {
 //       sendMail("cargo", {
-//         name: `${TechInfo.name} ${TechInfo.surname}`,
+//         name: `${TechDepoInfo.name} ${TechDepoInfo.surname}`,
 //         productName: order.items.map(item => item.name).join(", "),
 //         trackingNo: order.trackingNo,
 //         shippingCompany: order.shipping,
@@ -620,7 +435,7 @@ const TechDepo = ({scrollRef}) => {
 //       }
 //     }
 //   });
-// }, [orders, sendMail, TechInfo, addCargoTracking, setOrders]);
+// }, [orders, sendMail, TechDepoInfo, addCargoTracking, setOrders]);
 
   const generateFakeOrderNo = () => {
     const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ"; // I, O gibi karışabilecek harfleri çıkar
@@ -657,7 +472,7 @@ const TechDepo = ({scrollRef}) => {
     }
 
     if (saveCard) {
-      setTechInfo(prev => ({
+      setTechDepoInfo(prev => ({
         ...prev,
         cardNumber,
         cardName,
@@ -690,7 +505,8 @@ const TechDepo = ({scrollRef}) => {
         
       // Sipariş anında gecikmeli mail gönderimi
       sendMail("invoice", {
-        name: `${TechInfo.name} ${TechInfo.surname}`,
+        mailId: 103,
+        name: `${TechDepoInfo.name} ${TechDepoInfo.surname}`,
         productName: newOrder.items.map(item => `${item.name} (${item.quantity} adet)`).join(", "),
         invoiceNo: "TD-2025-" + Date.now(),
         orderNo: newOrder.id,
@@ -706,7 +522,8 @@ const TechDepo = ({scrollRef}) => {
 
 
      sendMail("invoice", {
-      name: `${TechInfo.name} ${TechInfo.surname}`,
+      mailId: 104,
+      name: `${TechDepoInfo.name} ${TechDepoInfo.surname}`,
       productName: newOrder.items.map(item => `${item.name} (${item.quantity} adet)`).join(", "),
       invoiceNo: "TD-2024-" + Date.now(),
       orderNo: generateFakeOrderNo(),
@@ -727,11 +544,12 @@ const TechDepo = ({scrollRef}) => {
     }, { delaySeconds: 45 });
 
     sendMail("cargo", {
-      name: `${TechInfo.name} ${TechInfo.surname}`,
+      mailId: 102,
+      name: `${TechDepoInfo.name} ${TechDepoInfo.surname}`,
       productName: cards[Math.floor(Math.random() * cards.length)].name + " (1 adet)",
       trackingNo: newOrder.trackingNo,
       shippingCompany: newOrder.shipping,
-      orderNo: newOrder.id + "-FAKE",
+      orderNo: newOrder.id + "-FNT",
       from: "kargo@cargo-n0va.com",
       title: "Kargo Takip Bilgilendirme",
       precontent: "Kargoya Verildi!",
@@ -766,7 +584,42 @@ const TechDepo = ({scrollRef}) => {
     setShowCartNotice(true);
     setTimeout(() => setShowCartNotice(false), 2000);
 
-    if (newOrder.items.some(item => item.id === 15)) {
+    const boughtPrinter = newOrder.items.some(item => item.id === 15);
+
+    newOrder.items.forEach(item => {
+      const boughtPrinter = item.id === 15;
+
+      let value = 0;
+      if (boughtPrinter) value += 10;
+      if (TechDepoInfo.is3DChecked){
+        value += 5; // 3D Secure seçilmişse ekstra puan
+      } else {
+        value -= 5; // 3D Secure seçilmemişse eksi puan
+      }
+      if (saveCard) {
+        value -= 5; // Kart kaydedilmişse eksi puan
+      } else {
+        value += 5; // Kart kaydedilmemişse artı puan
+      }
+
+      addEventLog({
+        type: "payment",
+        questId: boughtPrinter ? "buy_printer" : null,
+        logEventType: "e-commerce",
+        value,
+        data: {
+          store: "TechDepo",
+          isFake: false,
+          is3DChecked: TechDepoInfo.is3DChecked,
+          isSaveCard: saveCard,
+          itemPrice: item.price,
+          itemName: item.name,
+          itemId: item.id,
+        }
+      });
+    });
+
+    if (boughtPrinter) {
         completeQuest("buy_printer");
         // Yazıcı satın alımı sonrası...
         addChatMessage(1, {
@@ -802,12 +655,12 @@ const TechDepo = ({scrollRef}) => {
     if (!acceptedTerms) newErrors.terms = "Gizlilik ve satış sözleşmesini onaylamalısınız.";
   
     // Kayıtlı kartla eşleşme kontrolü
-    if (TechInfo) {
+    if (TechDepoInfo) {
       const cardMatches =
-        cardNumber === TechInfo.cardNumber &&
-        cardName === TechInfo.cardName &&
-        expiryDate === TechInfo.cardExpiryDate &&
-        cvv === TechInfo.cardCVV;
+        cardNumber === TechDepoInfo.cardNumber &&
+        cardName.toLocaleLowerCase("tr-TR") === (TechDepoInfo.cardName || "").toLocaleLowerCase("tr-TR") &&
+        expiryDate === TechDepoInfo.cardExpiryDate &&
+        cvv === TechDepoInfo.cardCVV;
     
       if (!cardMatches) {
         newErrors.registeredCard = "Kart bilgileri kayıtlı bilgilerle eşleşmiyor.";
@@ -836,6 +689,11 @@ const TechDepo = ({scrollRef}) => {
       // önce işleniyor yazısı çıksın
       setIsPaying(true);
 
+      setTechDepoInfo(prev => ({
+        ...prev,
+        is3DChecked: true,
+      }));
+
       setTimeout(() => {
         generateCodeMessage("TechDepo 3D Secure", "techdepo-payment");
         setIs3DWaiting(true);
@@ -861,7 +719,7 @@ const TechDepo = ({scrollRef}) => {
 
   const handleLogin2FACheck = () => {
     if (twoFACodeInput === lastCodes["techdepo"]) {
-      setTechInfo(prev => ({ ...prev, isLoggedIn: true, loginAttempts: 0 }));
+      setTechDepoInfo(prev => ({ ...prev, isLoggedIn: true, loginAttempts: 0 }));
       setIs2FAwaiting(false);
       clearCode("techdepo");
       setCodeTimer(120);
@@ -869,9 +727,9 @@ const TechDepo = ({scrollRef}) => {
       setLockMessage("");
       setPage("welcome");
     } else {
-      if (TechInfo.loginAttempts >= 2) {
+      if (TechDepoInfo.loginAttempts >= 2) {
         const unlockAt = Date.now() + 10 * 60 * 1000;
-        setTechInfo(prev => ({ ...prev, lockoutUntil: unlockAt, loginAttempts: 0 }));
+        setTechDepoInfo(prev => ({ ...prev, lockoutUntil: unlockAt, loginAttempts: 0 }));
         setLockMessage("🚫 Çok fazla giriş denemesi yapıldı.");
         setTimeout(() => {
           setIs2FAwaiting(false);
@@ -882,7 +740,7 @@ const TechDepo = ({scrollRef}) => {
           clearCode("techdepo");
         }, 2500);
       } else {
-        setTechInfo(prev => ({ ...prev, loginAttempts: prev.loginAttempts + 1 }));
+        setTechDepoInfo(prev => ({ ...prev, loginAttempts: prev.loginAttempts + 1 }));
         setErrorMessage("⚠ Kod hatalı!");
         setTimeout(() => setErrorMessage(""), 2000);
         setTwoFACodeInput("");
@@ -896,11 +754,11 @@ const TechDepo = ({scrollRef}) => {
       clearCode("techdepo-payment");
       setIs3DWaiting(false);
       setPayment2FACode("");
-      setTechInfo(prev => ({ ...prev, loginAttempts: 0 }));
+      setTechDepoInfo(prev => ({ ...prev, loginAttempts: 0 }));
       handlePayment(); // Doğruysa ödeme tamamlanır
     } else {
-      if (TechInfo.loginAttempts >= 2) {
-        setTechInfo(prev => ({ ...prev, loginAttempts: 0 }));
+      if (TechDepoInfo.loginAttempts >= 2) {
+        setTechDepoInfo(prev => ({ ...prev, loginAttempts: 0 }));
         setLockMessage("🚫 Çok fazla giriş denemesi yapıldı.");
         setTimeout(() => {
           setCardNumber("");
@@ -922,13 +780,53 @@ const TechDepo = ({scrollRef}) => {
           setPage("welcome");
         }, 2500);
       } else {
-        setTechInfo(prev => ({ ...prev, loginAttempts: prev.loginAttempts + 1 }));
+        setTechDepoInfo(prev => ({ ...prev, loginAttempts: prev.loginAttempts + 1 }));
         setErrorMessage("⚠ Kod hatalı!");
         setTimeout(() => setErrorMessage(""), 2000);
         setPayment2FACode("");
       }
     }
   };
+
+  const handlePasswordReset = () => {
+    if (!TechDepoInfo.isRegistered || TechDepoInfo.email !== email) {
+    setPage("login");
+    setErrorMessage("Bu e-posta ile kayıtlı bir hesap bulunmamaktadır.");
+    setTimeout(() => setErrorMessage(""), 2000);
+    return;
+  }
+
+  if (!email || !email.includes("@")) {
+    setErrorMessage("Lütfen geçerli bir e-posta adresi girin.");
+    setTimeout(() => setErrorMessage(""), 2000);
+    return;
+  }
+
+  const expireAt = (secondsRef?.current || 0) + 60; // 10 dk = 600 sn
+
+  // Mail gönder
+  sendMail("resetPassword", {
+    from: "techdepo@support.com",
+    title: "Şifre Sıfırlama Talebi",
+    precontent: "Şifrenizi sıfırlamak için bu e-postayı inceleyin.",
+    content: createResetPasswordMail({
+      email,
+      site: "techdepo",
+      siteDisplayName: "TechDepo",
+      from: { id: 1011 },
+      expireAt,
+    })
+  });
+
+  setSuccessMessage("Şifre sıfırlama bağlantısı e-posta kutunuza gönderildi.");
+  // 2 saniye sonra otomatik temizle
+  setTimeout(() => {
+    setSuccessMessage("");
+  }, 2000);
+  
+  setPage("login");
+  
+};
 
   const formatExpiryDate = (value) => {
   // Sadece rakamları al
@@ -940,8 +838,8 @@ const TechDepo = ({scrollRef}) => {
 };
 
   const handleEdit = () => {
-    setTechInfo({
-      ...TechInfo,
+    setTechDepoInfo({
+      ...TechDepoInfo,
       name: editableName,
       surname: editableSurname,
     });
@@ -958,18 +856,18 @@ const TechDepo = ({scrollRef}) => {
    const toggleUserMenu = () => setShowUserMenu(!showUserMenu);
 
    // Kullanıcı bilgilerini düzenlemek için state'ler
-   const [editableName, setEditableName] = useState(TechInfo.name);
-   const [editableSurname, setEditableSurname] = useState(TechInfo.surname);
+   const [editableName, setEditableName] = useState(TechDepoInfo.name);
+   const [editableSurname, setEditableSurname] = useState(TechDepoInfo.surname);
 
    useEffect(() => {
-     setEditableName(TechInfo.name);
-     setEditableSurname(TechInfo.surname);
-   }, [TechInfo.name, TechInfo.surname]);
+     setEditableName(TechDepoInfo.name);
+     setEditableSurname(TechDepoInfo.surname);
+   }, [TechDepoInfo.name, TechDepoInfo.surname]);
 
    const [infoUpdated, setInfoUpdated] = useState(false); // ✔ güncellendi bildirimi
    const isChanged =
-   editableName !== TechInfo.name ||
-   editableSurname !== TechInfo.surname;
+   editableName !== TechDepoInfo.name ||
+   editableSurname !== TechDepoInfo.surname;
 
 
    // User menu dışına tıklanıldığında menüyü kapat
@@ -1054,10 +952,10 @@ const TechDepo = ({scrollRef}) => {
                   <span className={styles.cartCounter}>{getCartItemCount()}</span>
                 )}
               </div>
-              {TechInfo.isLoggedIn ? (
+              {TechDepoInfo.isLoggedIn ? (
                 <div className={styles.userPanel}   onClick={toggleUserMenu}>
                   
-                  <p className={styles.userName}><img src={"/techDepo/programmer.png"} alt="user"/> {TechInfo.name} {TechInfo.surname}</p>
+                  <p className={styles.userName}><img src={"/techDepo/programmer.png"} alt="user"/> {TechDepoInfo.name} {TechDepoInfo.surname}</p>
                   {showUserMenu &&
                     <div className={styles.userActions} ref={userMenuRef}>
                     <button className={styles.settingsButton}  onClick={() => setPage("userProfile")}> Kullanıcı Bilgilerim</button>
@@ -1141,13 +1039,10 @@ const TechDepo = ({scrollRef}) => {
             {cards.map((card) => (
               <div key={card.id} className={styles.animatedCard}
                 onClick={() => {
-                  if (TechInfo.isLoggedIn) {
+                  if (TechDepoInfo.isLoggedIn) {
                     setPage(`product_${card.id}`);
                   } else {
                     setErrorMessage("Öncelikle giriş yapmalısınız!");
-                    setTimeout(() => {
-                      showTemporaryError("");
-                    }, 3000); 
                     setPage("login");                      
                   }
                 }}  
@@ -1159,13 +1054,10 @@ const TechDepo = ({scrollRef}) => {
                   className={styles.addButton}
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (TechInfo.isLoggedIn) {
+                    if (TechDepoInfo.isLoggedIn) {
                       addToCart(card);
                     } else {
                       setErrorMessage("Öncelikle giriş yapmalısınız!");
-                      setTimeout(() => {
-                        showTemporaryError("");
-                      }, 3000); 
                       setPage("login");                      
                     }
                   }}
@@ -1217,7 +1109,7 @@ const TechDepo = ({scrollRef}) => {
       )}
 
       {/* TechDepo giriş/kayıt olma sayfası */}
-      {page === "login" && !TechInfo.isLoggedIn && (
+      {page === "login" && !TechDepoInfo.isLoggedIn && (
         <div className={styles.loginForm}>
           {!is2FAwaiting ? (
             <>
@@ -1232,19 +1124,29 @@ const TechDepo = ({scrollRef}) => {
               <input type="password" placeholder="Şifreniz" value={password} onChange={(e) => setPassword(e.target.value)} />
               <button
                 onClick={handleAuth}
-                disabled={isLogin && TechInfo.lockoutUntil && Date.now() < TechInfo.lockoutUntil}
+                disabled={isLogin && TechDepoInfo.lockoutUntil && Date.now() < TechDepoInfo.lockoutUntil}
               >
                 {isLogin ? "Giriş Yap" : "Kayıt Ol"}
               </button>
-              {TechInfo.lockoutUntil && Date.now() < TechInfo.lockoutUntil && isLogin && (
+              {TechDepoInfo.lockoutUntil && Date.now() < TechDepoInfo.lockoutUntil && isLogin && (
                 <label className={styles.twoFAError}>
                   🚫 Çok fazla giriş denemesi yapıldı. <b>{getLockoutRemainingMinutes()}</b> dakika sonra tekrar deneyin.
                 </label>
               )}
               {errorMessage && <span className={styles.errorMessage}>{errorMessage}</span>}
+              {successMessage && <span className={styles.successMessage}>{successMessage}</span>}
               <p onClick={handleSignInOut}>
                 {isLogin ? "Hesabınız yok mu? Kayıt olun!" : "Zaten üye misiniz? Giriş yapın!"}
               </p>
+              {isLogin && (
+                <button
+                className={styles.forgotPasswordButton}
+                type="button"
+                onClick={() => setPage("forgot")}
+                >
+                  🔐 Şifremi Unuttum
+                </button>
+              )}
             </>
           ) : (
             <>
@@ -1261,7 +1163,7 @@ const TechDepo = ({scrollRef}) => {
               </label>
               <button
                 onClick={handleLogin2FACheck}
-                disabled={TechInfo.lockoutUntil && Date.now() < TechInfo.lockoutUntil}
+                disabled={TechDepoInfo.lockoutUntil && Date.now() < TechDepoInfo.lockoutUntil}
               >
                 Giriş Yap
               </button>
@@ -1270,6 +1172,24 @@ const TechDepo = ({scrollRef}) => {
               {errorMessage && <span className={styles.errorMessage}>{errorMessage}</span>}
             </>
           )}
+        </div>
+      )}
+
+      {page === "forgot" && (
+        <div className={styles.forgotPasswordContainer}>
+          <h2 className={styles.forgotTitle}>🔐 Şifremi Unuttum</h2>
+          <p className={styles.forgotInfo}>Kayıtlı e-posta adresinizi girin. Size bir şifre sıfırlama bağlantısı gönderilecektir.</p>
+
+          <input className={styles.forgotInput} type="email" placeholder="E-posta adresiniz" readOnly value={email} />
+
+          <div className={styles.forgotButtonGroup}>
+            <button className={styles.forgotButton} onClick={handlePasswordReset}>
+              Gönder
+            </button>
+            <button className={styles.forgotBackButton} onClick={() => setPage("login")}>
+              Geri Dön
+            </button>
+          </div>
         </div>
       )}
 
@@ -1294,11 +1214,11 @@ const TechDepo = ({scrollRef}) => {
               <label>E-mail :</label>
               <input type="text" placeholder="E-posta adresiniz" value={email} readOnly/>
               <label>Ad Soyad :</label>
-              <input type="text" placeholder="Adınız Soyadınız" value={`${TechInfo.name} ${TechInfo.surname}`} readOnly />
+              <input type="text" placeholder="Adınız Soyadınız" value={`${TechDepoInfo.name} ${TechDepoInfo.surname}`} readOnly />
               <label>Telefon Numarası :</label>
-              <input type="text" placeholder="Telefon Numaranız" value={TechInfo.phone} readOnly />
+              <input type="text" placeholder="Telefon Numaranız" value={TechDepoInfo.phone} readOnly />
               <label>Adres :</label>
-              <input type="text" placeholder="Adres" value={TechInfo.adres} readOnly />
+              <input type="text" placeholder="Adres" value={TechDepoInfo.adres} readOnly />
             </div>
 
             {/* 3. Kargo Seçimi */}
@@ -1386,14 +1306,14 @@ const TechDepo = ({scrollRef}) => {
                   onChange={(e) => setCVV(e.target.value)}
                 />
                 </div>
-                {TechInfo.isLoggedIn && TechInfo.savedCard && (
+                {TechDepoInfo.isLoggedIn && TechDepoInfo.savedCard && (
                   <button
                     type="button"
                     className={styles.fillSavedCardButton}
                     onClick={() => {
-                      setCardNumber(TechInfo.cardNumber);
-                      setCardName(TechInfo.cardName);
-                      setExpiryDate(TechInfo.cardExpiryDate);
+                      setCardNumber(TechDepoInfo.cardNumber);
+                      setCardName(TechDepoInfo.cardName);
+                      setExpiryDate(TechDepoInfo.cardExpiryDate);
                       // CVV boş bırakılacak
                       setCVV("");
                     }}
@@ -1487,7 +1407,7 @@ const TechDepo = ({scrollRef}) => {
           </label>
          <button
             onClick={handlePayment2FACheck}
-            disabled={TechInfo.lockoutUntil && Date.now() < TechInfo.lockoutUntil}
+            disabled={TechDepoInfo.lockoutUntil && Date.now() < TechDepoInfo.lockoutUntil}
           >
             Ödemeyi Onayla
           </button>
@@ -1557,7 +1477,7 @@ const TechDepo = ({scrollRef}) => {
                   <input value={email} disabled />
 
                   <strong>Telefon:</strong>
-                  <input value={TechInfo.phone} disabled />
+                  <input value={TechDepoInfo.phone} disabled />
 
                   <button
                     onClick={handleEdit}
@@ -1579,9 +1499,9 @@ const TechDepo = ({scrollRef}) => {
                     <label className={styles.switch}>
                       <input
                         type="checkbox"
-                        checked={TechInfo.is2FAEnabled}
+                        checked={TechDepoInfo.is2FAEnabled}
                         onChange={(e) =>
-                          setTechInfo({ ...TechInfo, is2FAEnabled: e.target.checked })
+                          setTechDepoInfo({ ...TechDepoInfo, is2FAEnabled: e.target.checked })
                         }
                       />
                       <span className={styles.slider}></span>
@@ -1597,11 +1517,11 @@ const TechDepo = ({scrollRef}) => {
             {subPage === "cards" && (
               <div>
                 <h2>Kayıtlı Kartlarım</h2>
-                {TechInfo.savedCard ? (
+                {TechDepoInfo.savedCard ? (
                   <div className={styles.savedCard}>
-                    <p>💳 Kart Numarası: {maskCardNumber(TechInfo.cardNumber)}</p>
-                    <p>👤 Kart Sahibi: {TechInfo.cardName}</p>
-                    <p>📅 Son Kullanma Tarihi: {TechInfo.cardExpiryDate}</p>
+                    <p>💳 Kart Numarası: {maskCardNumber(TechDepoInfo.cardNumber)}</p>
+                    <p>👤 Kart Sahibi: {TechDepoInfo.cardName}</p>
+                    <p>📅 Son Kullanma Tarihi: {TechDepoInfo.cardExpiryDate}</p>
                   </div>
                 ) : (
                   <p style={{color: "black"}}>💳 Henüz kart eklenmemiş.</p>

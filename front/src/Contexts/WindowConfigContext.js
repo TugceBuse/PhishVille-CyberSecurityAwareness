@@ -73,7 +73,7 @@ const initialWindowConfig = {
     useComponent: useScanner,
     location: 'desktop',
     clickable: true,
-    available: true,
+    available: false,
     requiresInternet: false
   },
   antivirus: {
@@ -83,7 +83,7 @@ const initialWindowConfig = {
     useComponent: useAntivirus,
     location: 'desktop',
     clickable: true,
-    available: true,
+    available: false,
     requiresInternet: false
   },
   novabankapp: {
@@ -135,7 +135,57 @@ const initialWindowConfig = {
     clickable: true,
     available: false,
     requiresInternet: false
-  }
+  },
+  // hack1: {
+  //   icon: '/icons/pdf.png',
+  //   label: '2025 - Raporlar',
+  //   component: OpenLitePDFApp,
+  //   useComponent: useOpenLitePDFApp,
+  //   location: 'desktop',
+  //   clickable: true,
+  //   available: false,
+  //   requiresInternet: false
+  // },
+  // hack2: {
+  //   icon: '/icons/zip-file.png',
+  //   label: 'Denetim_Puanları.zip',
+  //   component: OpenLitePDFApp,
+  //   useComponent: useOpenLitePDFApp,
+  //   location: 'desktop',
+  //   clickable: true,
+  //   available: false,
+  //   requiresInternet: false
+  // },
+  // hack3: {
+  //   icon: '/icons/virus.png',
+  //   label: '************',
+  //   component: OpenLitePDFApp,
+  //   useComponent: useOpenLitePDFApp,
+  //   location: 'desktop',
+  //   clickable: true,
+  //   available: false,
+  //   requiresInternet: false
+  // },
+  //  hack4: {
+  //   icon: '/icons/coding.png',
+  //   label: 'pc.jpg',
+  //   component: OpenLitePDFApp,
+  //   useComponent: useOpenLitePDFApp,
+  //   location: 'desktop',
+  //   clickable: true,
+  //   available: false,
+  //   requiresInternet: false
+  // },
+  // hack5: {
+  //   icon: '/icons/play-music.png',
+  //   label: 'Video Oynatıcı.jpg',
+  //   component: OpenLitePDFApp,
+  //   useComponent: useOpenLitePDFApp,
+  //   location: 'desktop',
+  //   clickable: true,
+  //   available: false,
+  //   requiresInternet: false
+  // }
 };
 
 export const WindowConfigProvider = ({ children }) => {

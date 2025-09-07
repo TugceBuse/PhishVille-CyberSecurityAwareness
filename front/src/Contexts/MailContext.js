@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { mails as initialMails, sentMails as initialSentMails, spamMails as initialSpamMails, createCargoMail, createInvoiceMail, createDiscountMail  } from '../components/Mailbox/Mails';
+import { mails as initialMails, sentMails as initialSentMails, spamMails as initialSpamMails, createCargoMail, createInvoiceMail} from '../components/Mailbox/Mails';
 import { useNotificationContext } from './NotificationContext';
 import { useUIContext } from './UIContext';
 import { useTimeContext } from './TimeContext';
@@ -16,6 +16,7 @@ export const MailContextProvider = ({ children }) => {
   const [selectedMail, setSelectedMail] = useState(null);
   const [pendingMails, setPendingMails] = useState([]); // Statik mailler için, Wifi yokken bekletmek amacıyla
   const [pendingMailQueue, setPendingMailQueue] = useState([]); // Dinamik delayli gönderimler
+  const [isMailboxLoggedIn, setIsMailboxLoggedIn] = useState(false);
 
   const { isWificonnected } = useSecurityContext();
   const { gameDate, secondsRef } = useTimeContext();
@@ -69,7 +70,7 @@ export const MailContextProvider = ({ children }) => {
 
   // Statik senaryo maillerini uygun anda inbox/spam'a at
   useEffect(() => {
-    if (isWificonnected && pendingMails.length > 0) {
+    if (isMailboxLoggedIn && isWificonnected && pendingMails.length > 0) {
       pendingMails.forEach(mail => {
         // Her mail stack'ten mailbox'a işlenir
         if (mail.type === 'inbox') {
@@ -108,7 +109,7 @@ export const MailContextProvider = ({ children }) => {
       });
       setPendingMails([]); // Stack boşaltılır
     }
-  }, [isWificonnected, pendingMails, initMail, initspamMails, gameDate]);
+  }, [isWificonnected, pendingMails, initMail, initspamMails, gameDate, isMailboxLoggedIn]);
 
   // --- Dinamik, delay ile gönderilen (sipariş sonrası) mailler için ---
   const actuallySendMail = (type, params) => {
@@ -137,6 +138,18 @@ export const MailContextProvider = ({ children }) => {
         used: false,
         sendTime: params.sendTime || gameDate,
         content: createInvoiceMail({ ...params, mailId }),
+      };
+    } else if (type === "resetPassword") {
+      mailObj = {
+        id: mailId,
+        from: params.from,
+        title: params.title,
+        precontent: params.precontent,
+        readMail: false,
+        notified: false,
+        used: false,
+        sendTime: params.sendTime || gameDate,
+        content: params.content, // ✅ Bu sadece <div>...</div> içeriği olmalı
       };
     }
     // ...diğer türler burada genişletilebilir
@@ -190,6 +203,7 @@ export const MailContextProvider = ({ children }) => {
       addMailToMailbox, // statik mailler için aynen bırakıldı!
       sendMail, // dinamik ve gecikmeli gönderim
       markMailAsReadAndRemoveNotification, 
+      isMailboxLoggedIn, setIsMailboxLoggedIn,
     }}>
       {children}
     </MailContext.Provider>

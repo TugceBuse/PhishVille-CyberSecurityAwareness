@@ -109,7 +109,7 @@
   box-shadow: 0 0 5px rgba(0, 115, 230, 0.5);
 }
 
-.authBox button {
+.loginRegisterButton {
   width: 100%;
   padding: 12px;
   background-color: #005bb5;
@@ -162,6 +162,7 @@
   border-radius: 8px;
   text-align: left;
   margin-bottom: 15px;
+  margin-top: 15px;
 }
 
 .jobListings h2{
@@ -241,7 +242,13 @@
   text-decoration: none;
 }
 
-
+.SuccessMessage {
+  color: rgb(6, 204, 22);
+  font-size: 0.9rem;
+  margin-top: 10px;
+  font-weight: bold;
+  text-decoration: none;
+}
 /* 🔧 Ayarlar Butonu */
 .settingsButton {
   background: #ffb74d;
@@ -395,12 +402,105 @@
 .successPassword {
   animation: fadeIn 0.3s ease-in-out;
 }
+/* ŞİFREMİ UNUTTUM BUTONU CSS */
+.forgotPasswordButton {
+  background: linear-gradient(135deg, #4da7ff, #327ddb);
+  border: none;
+  padding: 8px 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 3px 6px rgba(50, 125, 219, 0.4);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
 
+.forgotPasswordButton:hover {
+  background: linear-gradient(135deg, #3c94f6, #286bc7);
+  box-shadow: 0 4px 12px rgba(50, 125, 219, 0.5);
+}
+.forgotPasswordContainer {
+  background-color: #1e2738;
+  padding: 28px 24px;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: center;
+  color: #f1f1f1;
+}
+
+.forgotTitle {
+  font-size: 1.4rem;
+  margin-bottom: 10px;
+  color: #ffd166;
+}
+
+.forgotInfo {
+  font-size: 0.95rem;
+  color: #a0aab7;
+  margin-bottom: 20px;
+}
+
+.forgotInput {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  border: 1.5px solid #3c4a5e;
+  border-radius: 8px;
+  background-color: #2a3444;
+  color: #f0f0f0;
+  outline: none;
+  margin-bottom: 20px;
+  transition: border-color 0.2s;
+}
+
+.forgotInput:focus {
+  border-color: #4da7ff;
+}
+
+.forgotButtonGroup {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.forgotButton {
+  padding: 10px 18px;
+  background: linear-gradient(135deg, #4da7ff, #327ddb);
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.forgotButton:hover {
+  background: linear-gradient(135deg, #3c94f6, #286bc7);
+}
+
+.forgotBackButton {
+  padding: 10px 18px;
+  background-color: transparent;
+  border: 2px solid #4da7ff;
+  color: #4da7ff;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.forgotBackButton:hover {
+  background-color: #4da7ff;
+  color: #fff;
+}
 /* Reklam Pop-up (Gelişmiş İçerik) */
 .adPopup {
-  position: fixed;
+  position: absolute;
   top: 35%;
-  left: 43%;
+  left: 40%;
   transform: translate(-50%, -50%);
   width: 300px;
   background: linear-gradient(135deg, #ff9800, #ffeb3b);

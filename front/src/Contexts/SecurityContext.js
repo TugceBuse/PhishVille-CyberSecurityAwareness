@@ -12,9 +12,9 @@ export const SecurityProvider = ({ children }) => {
     // Tam koruma: realtime ve güncel birlikteyse aktif olsun
     const [fullProtection, setFullProtection] = useState(false);
     // Sistem güvenliği
-    const [domainNetworkEnabled, setDomainNetworkEnabled] = useState(true);
-    const [privateNetworkEnabled, setPrivateNetworkEnabled] = useState(true);
-    const [publicNetworkEnabled, setPublicNetworkEnabled] = useState(true);
+    const [domainNetworkEnabled, setDomainNetworkEnabled] = useState(false);
+    const [privateNetworkEnabled, setPrivateNetworkEnabled] = useState(false);
+    const [publicNetworkEnabled, setPublicNetworkEnabled] = useState(false);
 
     useEffect(() => {
         if (realTimeProtection && antivirusUpdated)

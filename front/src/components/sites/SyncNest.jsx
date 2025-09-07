@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useFileContext } from "../../Contexts/FileContext";
 import styles from "./SyncNest.module.css";
 import { useQuestManager } from "../../Contexts/QuestManager";
+import { useEventLog } from "../../Contexts/EventLogContext";
+import { useGameContext } from "../../Contexts/GameContext";
 
 const dummyCommunityFiles = [
   { label: "hobby_photos.zip", type: "zip", size: "6.2 MB", owner: "Anonim" },
@@ -10,11 +12,13 @@ const dummyCommunityFiles = [
 ];
 
 const SyncNest = () => {
+  const { constUser } = useGameContext();
   const { files } = useFileContext();
+  const { addEventLog } = useEventLog();
   const { failQuest } = useQuestManager();
   const downloadsFiles = Object.values(files).filter(
-    f => f.location === "downloads" && ["doc", "pdf", "txt"].includes(f.type)
-  );
+  f => f.location === "downloads" && ["doc", "pdf", "txt"].includes(f.type) && f.available === true
+);
 
   const [user, setUser] = useState(null);
   const [showUpload, setShowUpload] = useState(false);
@@ -27,22 +31,53 @@ const SyncNest = () => {
   const [form, setForm] = useState({ email: "", password: "", birth: "", address: "", phone: "" });
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    setForm({
+      email: constUser.email || "",
+      address: constUser.adres || "",
+      phone: constUser.phone || "",
+    })
+  }, [constUser]);
+
   // Kayıt işlemi
   const handleRegister = (e) => {
     e.preventDefault();
     if (!form.email || !form.password || !form.birth || !form.address) return setError("Tüm alanları doldurun.");
     setUser({ ...form });
     setError("");
+    addEventLog({
+      type: "register_SyncNest",
+      questId: "file_backup",
+      logEventType: "register",
+      value: -20,
+      data: {
+        for: "SyncNest",
+        isFake: true,
+        email: form.email,
+        birth: form.birth,
+        address: form.address,
+        phone: form.phone
+      }
+    });
+
   };
   // Giriş işlemi
   const handleLogin = (e) => {
     e.preventDefault();
-    if (form.email === user?.email && form.password === user?.password) {
-      setUser({ ...user, isLoggedIn: true });
-      setError("");
-    } else {
-      setError("Kullanıcı bulunamadı veya bilgiler hatalı.");
-    }
+    setUser({ ...form, isLoggedIn: true });
+    addEventLog({
+      type: "login_SyncNest",
+      questId: "file_backup",
+      logEventType: "login",
+      value: -10, 
+      data: 
+      {
+        to: "SyncNest",
+        isFake: true,
+        email: form.email
+      }
+    });
+    setError("");
   };
   // Çıkış
   const logout = () => {
@@ -69,6 +104,22 @@ const SyncNest = () => {
           ...prev
         ]);
         failQuest("file_backup");
+        addEventLog({
+          type: "backup",
+          questId: "file_backup",
+          logEventType: "cloud_backup",
+          value: -4* downloadsFiles.length,
+          data: {
+            site: "SyncNest",
+            isFake: true,
+            files: downloadsFiles.map(f => ({
+              label: f.label,
+              size: f.size,
+              type: f.type
+            })),
+            totalFiles: downloadsFiles.length
+          }
+        });
         setShowUpload(false);
         setUploadProgress(0);
       }
@@ -103,7 +154,7 @@ const SyncNest = () => {
               required
               placeholder="E-posta"
               value={form.email}
-              onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+              readOnly
               autoComplete="username"
             />
             <input
@@ -128,14 +179,14 @@ const SyncNest = () => {
                   required
                   placeholder="Adres"
                   value={form.address}
-                  onChange={e => setForm(f => ({ ...f, address: e.target.value }))}
+                  readOnly
                 />
                 <input
                   type="tel"
                   required
                   placeholder="Telefon"
                   value={form.phone}
-                  onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                  readOnly
                 />
                 <div className={styles.checkboxArea}>
                   <input type="checkbox" checked readOnly />

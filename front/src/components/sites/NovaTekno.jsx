@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import styles from "./NovaTekno.module.css";
+import { useEventLog } from "../../Contexts/EventLogContext";
 
 const products = [
   { id: 1, name: "Kampanya Laptop", price: 17999, image: "/techdepo/computer1.jpg", category: "laptop" },
@@ -10,6 +11,7 @@ const products = [
 ];
 
 const NovaTekno = () => {
+  const {addEventLog} = useEventLog();
   const [cart, setCart] = useState([]);
   const [page, setPage] = useState("home");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -143,23 +145,36 @@ const NovaTekno = () => {
           {paymentStep === 1 && (
             <>
               <h2>Teslimat Bilgileri</h2>
-              <input type="text" placeholder="Ad Soyad" />
-              <input type="text" placeholder="Adres" />
-              <input type="text" placeholder="Telefon" />
+              <input type="text" required placeholder="Ad Soyad" />
+              <input type="text" required placeholder="Adres" />
+              <input type="text" required placeholder="Telefon" />
               <button onClick={() => setPaymentStep(2)}>Devam Et</button>
             </>
           )}
           {paymentStep === 2 && (
             <>
               <h2>Kart Bilgileri</h2>
-              <input type="text" placeholder="Kart Numarası" />
-              <input type="text" placeholder="Son Kullanma Tarihi" />
-              <input type="text" placeholder="CVV" />
+              <input type="text" required placeholder="Kart Üzerindeki Ad Soyad" />
+              <input type="text" required placeholder="Kart Numarası" />
+              <input type="text" required placeholder="Son Kullanma Tarihi" />
+              <input type="text" required placeholder="CVV" />
               <button
                 onClick={() => {
-                  alert("Ödeme başarıyla tamamlandı!");
+                  const boughtPrinter = cart.some(item => item.id === 5);
+
                   setCart([]);
                   setPage("home");
+
+                  addEventLog({
+                    type: "payment",
+                    questId: boughtPrinter ? "buy_printer" : null,
+                    logEventType: "e-commerce",
+                    value: -10,
+                    data: {
+                      store: "NovaTekno",
+                      isFake: true,
+                    }
+                  });
                 }}
               >
                 Ödemeyi Tamamla

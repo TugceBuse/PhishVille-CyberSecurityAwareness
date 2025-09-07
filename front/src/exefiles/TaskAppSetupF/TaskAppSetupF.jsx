@@ -5,6 +5,7 @@ import { useWindowConfig } from '../../Contexts/WindowConfigContext';
 import { useUIContext } from '../../Contexts/UIContext';
 import { showFakeCMD } from '../../utils/fakeCMD';
 import { useNotificationContext } from '../../Contexts/NotificationContext';
+import { useGameContext } from '../../Contexts/GameContext';
 
 const binaryMessage = "01000010 01110101 00100000 01100010 01101001 01110010 00100000 01000010 01101001 01101110 01100001 01110010 01111001 00100000 01010100 01100101 01110011 01110100 00101101 01101101 01100101 01110011 01100001 01101010 11000100 10110001 01100100 11000100 10110001 01110010 00001010";
 
@@ -15,6 +16,8 @@ const TaskAppSetupF = ({ file, fileName, onAntivirusCheck }) => {
   const { setWindowConfig, windowConfig } = useWindowConfig();
   const { addNotification } = useNotificationContext();
   const hasStarted = useRef(false);
+
+  const { endGame } = useGameContext();
 
   useEffect(() => {
     const handleClick = async () => {
@@ -27,7 +30,6 @@ const TaskAppSetupF = ({ file, fileName, onAntivirusCheck }) => {
       }
 
       hasStarted.current = true;
-
       lockMouse();
 
       addVirus({
@@ -37,7 +39,6 @@ const TaskAppSetupF = ({ file, fileName, onAntivirusCheck }) => {
         sourcefile: fileName,
         impact: null,
         severity: "high",
-        startTime: Date.now()
       });
 
       setTimeout(() => {
@@ -52,11 +53,10 @@ const TaskAppSetupF = ({ file, fileName, onAntivirusCheck }) => {
         });
       }, 5000);
 
-      // ---- BİLDİRİM KISMI ----
       setTimeout(() => {  
         addNotification({
-          type: "warning",                // <-- RENK (ÖNEMLİ!)
-          appType: "system",              // <-- KATEGORİ (Kaynak)
+          type: "warning",
+          appType: "system",
           title: "Sistem Sıcaklığı Yüksek",
           message: "CPU sıcaklığı 99°C'ye ulaştı. Bilgisayarınız aşırı ısınabilir.",
           icon: "/icons/warning.png",
@@ -65,7 +65,6 @@ const TaskAppSetupF = ({ file, fileName, onAntivirusCheck }) => {
           duration: 6000
         });
       }, 3500);
-      // ---- SON ----
 
       setTimeout(async () => {
         setOpenWindows([]);
@@ -132,15 +131,31 @@ const TaskAppSetupF = ({ file, fileName, onAntivirusCheck }) => {
       }, 8000);
 
       setTimeout(() => {
-        unlockMouse();   // 🔓 Fare serbest
-      }, 20000);
+        unlockMouse();
+        // ENTEGRASYON: Virüs etkileri bittikten sonra oyunu bitir
+        endGame({
+          title: "Sistem Kritik Virüsle Kapatıldı!",
+          description: "Sisteminiz, clown virüsü nedeniyle kapatıldı. Sonuçlarınız kaydedildi."
+        });
+      }, 30000);
     };
 
     window.addEventListener('click', handleClick, { once: true });
     return () => {
       window.removeEventListener('click', handleClick);
     };
-  }, [setFiles, addVirus, lockMouse, unlockMouse, setWindowConfig, windowConfig, onAntivirusCheck, fileName, addNotification]);
+  }, [
+    setFiles,
+    addVirus,
+    lockMouse,
+    unlockMouse,
+    setWindowConfig,
+    windowConfig,
+    onAntivirusCheck,
+    fileName,
+    addNotification,
+    endGame // DİKKAT!
+  ]);
 
   return null;
 };

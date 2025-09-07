@@ -1,9 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import EndGame from '../EndGame/EndGame'
 import './Ransom.css';
+import { useNavigate } from 'react-router-dom';
 
-const Ransom = () => {
+const Ransom = ( { score, saveSession }) => {
   const [timeLeft, setTimeLeft] = useState(72 * 60 * 60);
   const [showContent, setShowContent] = useState(false);
+  const [showEndGame, setShowEndGame] = useState(false);
+  const kayitYapildi = useRef(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!showContent) return;
@@ -23,6 +28,32 @@ const Ransom = () => {
   }, [showContent]);
 
   useEffect(() => {
+    if (showContent) {
+      const endGameTimeout = setTimeout(() => {
+        setShowEndGame(true);
+      }, 10000);
+      return () => clearTimeout(endGameTimeout);
+    }
+  }, [showContent]);
+
+  useEffect(() => {
+    if (showEndGame && !kayitYapildi.current) {
+      kayitYapildi.current = true;
+      saveSession().then((result) => {
+        if (result === true) {
+          // Oyun başarıyla kaydedildi
+          console.log("Oyun başarıyla kaydedildi.");
+        } else {
+          // Oyun kaydedilemedi
+          console.error("Oyun kaydedilemedi: " + result);
+        }
+      }).catch((error) => {
+        console.error("Oyun kaydetme hatası:", error);
+      });
+    }
+  }, [showEndGame, saveSession]);
+
+  useEffect(() => {
     const randomDelay = Math.floor(Math.random() * 20000) + 10000;
     const timeout = setTimeout(() => {
       setShowContent(true);
@@ -39,6 +70,14 @@ const Ransom = () => {
   };
   // showContent true olana kadar null döndür
   if (!showContent) return null;
+  if (showEndGame)
+  return <EndGame
+          title="Simülasyon Sonlandı!"
+          description="Kritik bir virüs sebebiyle simülasyon sonlandı.!"
+          score={score}
+          onRestart={() => { navigate("/") }}
+          onClose={() => navigate("/") }
+        /> 
   return (
     <div className="ransomware-container">
       <div className="ransomware-timer">
@@ -82,5 +121,9 @@ const Ransom = () => {
     </div>
   );
 };
+
+
+
+ 
 
 export default Ransom;

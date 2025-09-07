@@ -1,11 +1,15 @@
-NovaTech A.Ş. - Kişisel Kullanıcı Bilgileri
+Kişisel Kullanıcı Bilgileri
 
-👤 Ad Soyad: Onur Yıldız
-🆔 Çalışan ID: 487231
-💼 Departman: Bilgi Teknolojileri
-📧 Kurumsal E-posta: onur.yildiz@novatech.com
-📞 Dahili Numara: 2211
-🧑‍💻 Kullanıcı Adı: onur.yildiz
-🔑 Geçici Şifre: Nova_25xyz!
+Simülasyon boyunca ihtiyaç duyabileceğin eksik bilgiler aşağıda yer alıyor:
 
-Lütfen bu bilgileri sadece kurum içi sistemlerde kullanınız. Güvenliğiniz için şifreyi ilk oturum açma sonrası değiştirmeniz önerilir.
+Telefon Numarası: 0541 649 4438
+Adres: Atatürk Mahallesi, Gökkuşağı Sokak No:17/3, 34850, Yıldızlı İlçesi, İstanbul
+TC No: 5281749362
+Dijital Banka Şifren: 123456
+
+Kart Bilgileri:
+Kart Numarası: 5369 4821 3754 1064
+Kart Son Kullanma Tarihi: 05/26
+Kart CVV: 697
+
+Lütfen bu bilgileri sadece kurum içi sistemlerde kullanınız.

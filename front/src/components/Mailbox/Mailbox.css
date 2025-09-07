@@ -442,3 +442,79 @@
     position: relative;
   }
   
+
+  /* Simülasyon başında açılacak giriş kısmı CSS */
+  .mailbox-login-screen {
+  width: 100%;
+  height: 100%;
+  min-height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #191926 0%, #27273d 100%);
+  z-index: 30;
+  border-radius: 0 0 18px 18px;
+}
+
+.mailbox-login-form {
+  background: #23243a;
+  padding: 34px 26px 26px 26px;
+  border-radius: 16px;
+  box-shadow: 0 2px 22px 2px #0007;
+  min-width: 320px;
+  max-width: 350px;
+  color: #eaeaea;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mailbox-login-form h2 {
+  margin-bottom: 18px;
+  color: #fff;
+  letter-spacing: 0.5px;
+  font-size: 1.32rem;
+}
+
+.mailbox-login-form input[type="email"],
+.mailbox-login-form input[type="password"] {
+  background: #181926;
+  border: 1px solid #38404c;
+  color: #eee;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 16px;
+  margin-bottom: 2px;
+  margin-top: 2px;
+  transition: border 0.15s;
+}
+
+.mailbox-login-form input:focus {
+  outline: none;
+  border-color: #51b0f2;
+}
+
+.mailbox-login-form button[type="submit"] {
+  background: linear-gradient(90deg, #50aff0, #5a71ef);
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  padding: 11px 0;
+  margin-top: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.mailbox-login-form button[type="submit"]:hover {
+  background: linear-gradient(90deg, #4b9ade, #6a60e3);
+}
+
+.mailbox-login-form .mailbox-login-error {
+  color: #ff9a4c;
+  margin-top: 12px;
+  font-size: 15px;
+  font-weight: 500;
+}

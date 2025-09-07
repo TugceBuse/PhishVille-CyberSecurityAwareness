@@ -4,8 +4,7 @@ import { useGameContext } from '../../Contexts/GameContext';
 import { useQuestManager } from '../../Contexts/QuestManager';
 
 const TaskApp = () => {
-  const { isTaskAppInstalled } = useGameContext();
-  const { getActiveQuests } = useQuestManager();
+  const { getActiveQuests, isTaskAppInstalled } = useQuestManager();
   const [visible, setVisible] = useState(false);
   const [closing, setClosing] = useState(false);
   const [openedDescId, setOpenedDescId] = useState(null);

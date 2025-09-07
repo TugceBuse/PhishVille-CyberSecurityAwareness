@@ -5,6 +5,7 @@ import { useUIContext } from '../../Contexts/UIContext';
 import { useVirusContext } from '../../Contexts/VirusContext';
 import { useFileContext } from '../../Contexts/FileContext';
 import { useSecurityContext } from '../../Contexts/SecurityContext';
+import { useEventLog } from '../../Contexts/EventLogContext'; // <-- EKLENDİ
 
 const icons = [
   "/icons/folder-home.png",
@@ -42,21 +43,23 @@ const Antivirus = ({ closeHandler, style }) => {
   const [checkingUpdates, setCheckingUpdates] = useState(false);
   const [hasCheckedUpdates, setHasCheckedUpdates] = useState(false);
   const [updateProgress, setUpdateProgress] = useState(0);
-  const updateIntervalRef = useRef(null); // İptal etmek için referans
+  const updateIntervalRef = useRef(null);
 
-
-
-  const { viruses, removeVirus,} = useVirusContext();
-  
-  const { 
+  const { viruses, removeVirus, } = useVirusContext();
+  const {
     isWificonnected,
     scanLogs, setScanLogs,
     realTimeProtection, setRealTimeProtection,
     antivirusUpdated, setAntivirusUpdated,
-    antivirusUpdating, setAntivirusUpdating, 
-        } = useSecurityContext();
-
+    antivirusUpdating, setAntivirusUpdating,
+  } = useSecurityContext();
   const { files, updateFileStatus } = useFileContext();
+  const { 
+    addEventLog, 
+    addEventLogOnce, 
+    addEventLogWithCooldown, 
+    addEventLogOnChange 
+  } = useEventLog(); // <-- LOG FONKSİYONLARI
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -64,25 +67,43 @@ const Antivirus = ({ closeHandler, style }) => {
     }, 1000);
     return () => clearInterval(interval);
   }, []);
+
   // Antivirüs Tarama Simülasyonu Karantinaya alma ve log tutma işlemleri
   const handleScanClick = () => {
     setIsScanning(true);
     setScanComplete(false);
     setQuarantinedFiles([]);
-  
+    
+    // LOG: Tarama başlatıldı (cooldown'lu, 30sn tekrar engeli)
+    addEventLogWithCooldown(
+      "antivirus_scan",
+      null,
+      null,
+      {
+        type: "antivirus_scan",
+        questId: "antivirus_install",
+        logEventType: "antivirus",
+        value: 10,
+        data: {}
+      },
+      30 * 1000 * 60 // 30sn örnek, ihtiyaca göre artır
+    );
+
     const now = new Date();
     const date = now.toLocaleDateString('tr-TR');
     const time = now.toLocaleTimeString('tr-TR');
     const scanDate = `${date} - ${time}`;
-  
+
     setTimeout(() => {
       const quarantined = [];
       const quarantinedFilesSet = new Set();
-  
+
       // 🔎 1. Aktif virüsleri analiz et (Virüs context’ten gelenler)
-      const detectableViruses = viruses.filter(v => v.detectable && v.sourcefile);
+      const detectableViruses = antivirusUpdated
+        ? viruses.filter(v => v.detectable && v.sourcefile)
+        : [];
       console.log("Detectable Viruses:", detectableViruses);
-  
+
       detectableViruses.forEach(virus => {
         const fileKey = Object.keys(files).find(
           file => files[file].label.toLowerCase() === virus.sourcefile.toLowerCase()
@@ -93,93 +114,161 @@ const Antivirus = ({ closeHandler, style }) => {
             quarantined: true,
             available: false
           });
-  
+
           quarantined.push({
             fileName: fileKey,
             virusType: virus.type,
             virusId: virus.id
           });
-  
+
           quarantinedFilesSet.add(fileKey);
           removeVirus(virus.id); // virüs etkisizleştirildi
+
+          // LOG: Dosya karantinaya alındı (bir kere logla)
+          addEventLogOnce(
+            "file_quarantined",
+            "fileName",
+            fileKey,
+            {
+              type: "file_quarantined",
+              questId: "antivirus_install",
+              logEventType: "antivirus",
+              value: -10,
+              data: { fileName: fileKey, virusType: virus.type, virusId: virus.id }
+            }
+          );
         }
       });
-  
+
       // 🔍 2. Dosya içinden doğrudan enfekte olanları analiz et (aktif virüs olmasa bile)
       Object.entries(files).forEach(([fileName, fileData]) => {
-        console.log("FileName:", fileName);
-        console.log("FileData:", fileData);
+        // console.log("FileName:", fileName);
+        // console.log("FileData:", fileData);
         const isDetectableInfected =
+          antivirusUpdated &&
           fileData.detectable &&
           fileData.infected &&
           fileData.available &&
           !fileData.quarantined;
-          console.log("Is Detectable Infected:", isDetectableInfected);
-  
+        console.log("Is Detectable Infected:", isDetectableInfected);
+
         const alreadyHandled = quarantinedFilesSet.has(fileName);
-  
+
         if (isDetectableInfected && !alreadyHandled) {
           updateFileStatus(fileName, {
             quarantined: true,
             available: false
           });
-  
+
           quarantined.push({
             fileName,
             virusType: fileData.virusType || "unknown",
             virusId: fileData.virusId || null
           });
-  
+
           quarantinedFilesSet.add(fileName);
+
+          // LOG: Dosya karantinaya alındı (bir kere logla)
+          addEventLogOnce(
+            "file_quarantined",
+            "fileName",
+            fileName,
+            {
+              type: "file_quarantined",
+              questId: "antivirus_install",
+              logEventType: "antivirus",
+              value: -10,
+              data: { fileName, virusType: fileData.virusType || "unknown", virusId: fileData.virusId || null }
+            }
+          );
         }
       });
 
       console.log("Quarantined Files:", quarantined);
       console.log("Quarantined Files Set:", quarantinedFilesSet);
-  
-      // 🔄 Durumları güncelle
+
+      // Durumları güncelle
       setIsScanning(false);
       setScanComplete(true);
       setQuarantinedFiles(quarantined); // Sadece array olarak setle
       setScanLogs(prev => [...prev, { date: scanDate, files: quarantined }]);
-  
+
       setTimeout(() => setScanComplete(false), 3000);
     }, 5000);
   };
 
-
-  
-
-  //Güncelleme kontrolü ve yükleme simülasyonu
+  // Güncelleme kontrolü ve yükleme simülasyonu
   const checkForUpdates = () => {
     setCheckingUpdates(true);
     setTimeout(() => {
       setCheckingUpdates(false);
       setHasCheckedUpdates(true);
+      // LOG: Güncellemeler kontrol edildi (sadece 1 kez logla)
+      addEventLogWithCooldown(
+        "antivirus_update_check",
+        null,
+        null,
+        {
+          type: "antivirus_update_check",
+          questId: "antivirus_install",
+          logEventType: "antivirus",
+          value: 5,
+          data: { checked: true }
+        },
+        30 * 60 * 1000 // 30 dakika cooldown
+      );
     }, 2000);
   };
-  
+
   const handleUpdateDefinitions = () => {
     setAntivirusUpdating(true);
     setUpdateProgress(0);
+
+    // LOG: Güncelleme başlatıldı (cooldown'lu, 2dk tekrar engeli)
+    addEventLogWithCooldown(
+      "antivirus_update_started",
+      null,
+      null,
+      {
+        type: "antivirus_update_started",
+        questId: "antivirus_install",
+        logEventType: "antivirus",
+        value: 0,
+        data: {}
+      },
+      2 * 60 * 1000
+    );
 
     updateIntervalRef.current = setInterval(() => {
       setUpdateProgress(prev => {
         if (prev >= 100) {
           clearInterval(updateIntervalRef.current);
-        setAntivirusUpdating(false);
-        setAntivirusUpdated(true);
-        return 100;
-      }
+          setAntivirusUpdating(false);
+          setAntivirusUpdated(true);
+
+          // LOG: Güncelleme tamamlandı (sadece bir kez logla)
+          addEventLogOnce(
+            "antivirus_update_completed",
+            null,
+            null,
+            {
+              type: "antivirus_update_completed",
+              questId: "antivirus_install",
+              logEventType: "antivirus",
+              value: 10,
+              data: { completed: true }
+            }
+          );
+          return 100;
+        }
         return prev + 5;
       });
     }, 200); // her 200ms'de %5 artar → ~4 saniye
   };
-  // sayfa kapatıldığında  interval'ı temizle
+
   useEffect(() => {
     return () => clearInterval(updateIntervalRef.current);
   }, []);
-  // İnternet bağlantısı kesildiğinde güncelleme iptal et
   useEffect(() => {
     if (antivirusUpdating && !isWificonnected) {
       clearInterval(updateIntervalRef.current);
@@ -192,22 +281,60 @@ const Antivirus = ({ closeHandler, style }) => {
     clearInterval(updateIntervalRef.current);
     setAntivirusUpdating(false);
     setUpdateProgress(0);
+    // LOG: Güncelleme iptal edildi (tekrarına izin ver, sadece aksiyon olarak log)
+    addEventLog({
+      type: "antivirus_update_canceled",
+      questId: "antivirus_install",
+      logEventType: "antivirus",
+      value: 0,
+      data: { canceled: true }
+    });
   };
 
   const handleToggleAntivirus = () => {
     setRealTimeProtection(!realTimeProtection);
+
+    // LOG: Gerçek zamanlı koruma toggle (onChange)
+    addEventLogOnChange(
+      "realtime_protection_toggle",
+      "state",
+      !realTimeProtection,
+      {
+        type: "realtime_protection_toggle",
+        questId: "antivirus_install",
+        logEventType: "antivirus",
+        value: !realTimeProtection ? 5 : -5,
+        data: { state: !realTimeProtection }
+      }
+    );
   };
 
   const handleDeleteFile = (fileName) => {
     updateFileStatus(fileName, { available: false, quarantined: false });
+    // LOG: Dosya silindi
+    addEventLog({
+      type: "file_deleted",
+      questId: null,
+      logEventType: "antivirus",
+      value: 0,
+      data: { fileName }
+    });
   };
 
   const handleRestoreFile = (fileName) => {
     updateFileStatus(fileName, { available: true, quarantined: false });
+    // LOG: Dosya karantinadan çıkarıldı
+    addEventLog({
+      type: "file_restored",
+      questId: null,
+      logEventType: "antivirus",
+      value: -3,
+      data: { fileName }
+    });
   };
 
   // 🔄 Tüm scanLogs içinden karantinaya alınmış ve hala karantinada olan dosyaları bul
-    const allQuarantinedFiles = Object.entries(files)
+  const allQuarantinedFiles = Object.entries(files)
     .filter(([fileName, fileData]) => fileData.quarantined)
     .map(([fileName, fileData]) => ({ fileName, ...fileData }));
 
@@ -297,7 +424,7 @@ const Antivirus = ({ closeHandler, style }) => {
 
             {scanComplete && quarantinedFiles.length > 0 && (
               <div className="antivirus-scan-complete warning">
-                <img src="/icons/caution.png" alt="Caution Icon" />
+                <img src="/icons/warning.png" alt="Warning Icon" />
                 <p>Tarama tamamlandı. {quarantinedFiles.length} dosya karantinaya alındı:</p>
                 <ul>
                   {quarantinedFiles.map(({ fileName, virusType }) => (

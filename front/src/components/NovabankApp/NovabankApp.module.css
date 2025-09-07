@@ -1,5 +1,7 @@
 .bankWindow {
     position: absolute;
+    top: 10%;
+    left: 10%;
     width: 800px;
     height: 650px;
     background-color: #fff5e6; /* Açık bej arka plan */

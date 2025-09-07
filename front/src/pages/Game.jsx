@@ -17,6 +17,8 @@
   import IntroScreen from '../components/IntroScreen/IntroScreen.jsx';
   import { QuestManagerProvider } from '../Contexts/QuestManager';
   import { NotepadProvider } from '../Contexts/NotepadContext.js';
+  import { EventLogProvider } from "../Contexts/EventLogContext.js";
+  import ScreenFadeTransition from "./ScreenFadeTransition.jsx";
 
     const Game = () => {
       useEffect(() => {
@@ -28,45 +30,58 @@
           document.removeEventListener('contextmenu', handleContextMenu);
         };
     }, []);
-    const [phase, setPhase] = useState("desktop");
+    const [phase, setPhase] = useState("intro");
+
+    const [fade, setFade] = useState(false);
+
+    const handleIntroFinish = () => {
+      setFade(true);                // 1. Fadeyi ekranda göster
+      setTimeout(() => {
+        setPhase("desktop");        // 2. Fade devam ederken phase değiştir
+        setFade(false);             // 3. Fade animasyonu bittiğinde kapat
+      }, 600); // Fade süresi ile aynı olmalı!
+    };
 
     return (
       <TimeProvider>
-        <UIContextProvider>
-          <NotificationProvider>
-            <Notification />
-              <QuestManagerProvider>
-              <SecurityProvider>
-                <VirusProvider>
-                  <FileContextProvider>
-                    <WindowConfigProvider>
-                      <MailContextProvider>
-                        <PhoneProvider>
-                          <GameContextProvider>
-                            <TodoProvider>
-                              <ChatContextProvider>
-                                <NotepadProvider>
-                                <CargoMailNotifier />
-                                <div className="game">
-                                  {/* {phase === "intro" && <IntroScreen onFinish={() => setPhase("hacked")} />}
-                                  {(phase === "hacked" || phase === "desktop") && (
-                                    <Desktop hacked={phase === "hacked"} onFormat={phase === "hacked" ? () => setPhase("desktop") : undefined} />
-                                  )}                       */}
-                                  {phase === "desktop" && <Desktop />}
-                                </div>
-                                </NotepadProvider>
-                              </ChatContextProvider>
-                            </TodoProvider>
-                          </GameContextProvider>
-                        </PhoneProvider>
-                      </MailContextProvider>
-                    </WindowConfigProvider> 
-                  </FileContextProvider>
-                </VirusProvider>
-              </SecurityProvider>
-            </QuestManagerProvider>
-          </NotificationProvider>
-        </UIContextProvider>
+        <EventLogProvider>
+          <UIContextProvider>
+            <NotificationProvider>
+              <Notification />
+                <QuestManagerProvider>
+                  <SecurityProvider>
+                    <VirusProvider>
+                      <FileContextProvider>
+                        <WindowConfigProvider>
+                          <MailContextProvider>
+                            <PhoneProvider>
+                              <GameContextProvider>
+                                <TodoProvider>
+                                  <ChatContextProvider>
+                                    <NotepadProvider>
+                                    <CargoMailNotifier />
+                                    <div className="game">
+                                    <ScreenFadeTransition show={fade} duration={1300} />
+                                      {phase === "intro" ? (
+                                        <IntroScreen onFinish={handleIntroFinish} />
+                                      ) : (
+                                        <Desktop />
+                                      )}
+                                  </div>
+                                  </NotepadProvider>
+                                </ChatContextProvider>
+                              </TodoProvider>
+                            </GameContextProvider>
+                          </PhoneProvider>
+                        </MailContextProvider>
+                      </WindowConfigProvider> 
+                    </FileContextProvider>
+                  </VirusProvider>
+                </SecurityProvider>
+              </QuestManagerProvider>
+            </NotificationProvider>
+          </UIContextProvider>
+        </EventLogProvider>
       </TimeProvider>
     );
   };

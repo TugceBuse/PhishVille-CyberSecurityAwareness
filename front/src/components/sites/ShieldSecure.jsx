@@ -1,81 +1,131 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import "./ShieldSecure.css";
+import { useFileContext } from "../../Contexts/FileContext";
+import { useEventLog } from "../../Contexts/EventLogContext";
 
 const ShieldSecure = () => {
+  const [progress, setProgress] = useState(0);
   const [buttonLoading, setButtonLoading] = useState(false);
-  const [downloadMessage, setDownloadMessage] = useState("");
   const [showPopup, setShowPopup] = useState(false);
+  const intervalRef = useRef(null);
 
+  const { files, updateFileStatus } = useFileContext();
+  const { addEventLog } = useEventLog();
+
+  const antivirusDownloaded = files?.antivirussetup?.available;
+
+  // Başlat
   const handleDownloadClick = () => {
     setButtonLoading(true);
-    setDownloadMessage("İndiriliyor...");
-    setTimeout(() => {
-      setButtonLoading(false);
-      setDownloadMessage("İndirme tamamlandı!");
-      setShowPopup(true);
-      setTimeout(() => {
-        setShowPopup(false);
-        setDownloadMessage("");
-      }, 3000);
-    }, 10000);
+    setProgress(0);
+
+    // LOG: İndirme başladı
+    addEventLog({
+      type: "antivirus_download_started",
+      logEventType: "antivirus",
+      questId: "antivirus_install",
+      value: 0,
+      data: { site: "ShieldSecure" },
+    });
+
+    intervalRef.current = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(intervalRef.current);
+          setButtonLoading(false);
+          setShowPopup(true);
+
+          // FileContext'i güncelle
+          updateFileStatus("antivirussetup", { available: true });
+
+          // LOG: İndirme tamamlandı
+          addEventLog({
+            type: "antivirus_download_completed",
+            logEventType: "antivirus",
+            questId: "antivirus_install",
+            value: 10,
+            data: { site: "ShieldSecure" },
+          });
+
+          // Popup otomatik gizle
+          setTimeout(() => {
+            setShowPopup(false);
+          }, 3000);
+
+          return 100;
+        }
+        return prev + 2;
+      });
+    }, 200); // %2 ilerleme = 10sn'de biter
+  };
+
+  // İptal Et
+  const handleCancel = () => {
+    clearInterval(intervalRef.current);
+    setButtonLoading(false);
+    setProgress(0);
+    // LOG: İndirme iptal edildi
+    addEventLog({
+      type: "antivirus_download_cancelled",
+      logEventType: "antivirus",
+      questId: "antivirus_install",
+      value: 0,
+      data: { site: "ShieldSecure" }
+    });
   };
 
   return (
-    <div className="download-div-inside">
-
-      {/* Reklam Kutusu */}
-      <div className="ad-box">
-        <h3>Özel Kampanya!</h3>
-        <p>Yıllık ShieldSecure Premium lisansında %50 indirim fırsatını kaçırmayın!</p>
-        <button className="premium-btn">Hemen Yükselt</button>
+    <div className="shieldsecure-modern-container">
+      <div className="shieldsecure-hero">
+        <img src="/icons/shieldSecure.png" className="shieldsecure-hero-icon" alt="ShieldSecure" />
+        <h2>ShieldSecure Antivirüs</h2>
+        <p className="shieldsecure-hero-desc">
+          Cihazınızı tehditlere karşı gerçek zamanlı koruyun.<br />
+          <span className="shieldsecure-green">Siber güvenliğiniz emin ellerde!</span>
+        </p>
       </div>
 
-      <h2>ShieldSecure Antivirüs İndirme Bölümü</h2>
-      <p>ShieldSecure antivirüs yazılımını indirmek için aşağıdaki bağlantıları kullanabilirsiniz.</p>
-
-    <div className="contentBox">
-      {/* Bilgilendirme Bölümü */}
-      <div className="shield-secure-container">
-        {/* Bilgilendirme Bölümü */}
-        <div className="info-box">
-          <h2>ShieldSecure Antivirus</h2>
-          <p>
-            ShieldSecure, cihazlarınızı virüslere, kötü amaçlı yazılımlara ve çevrimiçi tehditlere karşı koruyan güçlü bir antivirüs yazılımıdır.
-          </p>
+      <div className="shieldsecure-contentbox">
+        <div className="shieldsecure-infobox">
+          <h3>Avantajlar</h3>
           <ul>
-            <strong>
-              <li>Gerçek zamanlı tehdit algılama</li>
-              <li>Gelişmiş güvenlik duvarı koruması</li>
-              <li>Günlük otomatik güncellemeler</li>
-              <li>Güvenli internet gezintisi</li>
-            </strong>
+            <li>Gerçek zamanlı tehdit algılama</li>
+            <li>Gelişmiş güvenlik duvarı</li>
+            <li>Otomatik güncelleme</li>
+            <li>Güvenli internet gezintisi</li>
           </ul>
-          <p>Hizmetin En İyisi İçin:</p>
-          <img src="/icons/right-arrow (1).png" style={{width:24, height:24}}></img>
+        </div>
+
+        <div className="shieldsecure-downloadbox">
+          <h3> Antivirüs Setup İndir</h3>
+          {buttonLoading ? (
+            <div className="shieldsecure-progress-row">
+              <div className="shieldsecure-progress-outer">
+                <div className="shieldsecure-progress-inner" style={{ width: `${progress}%` }}>
+                  <span className="shieldsecure-progress-text">{progress}%</span>
+                </div>
+              </div>
+              <button className="shieldsecure-cancel-btn" onClick={handleCancel}>İptal Et</button>
+            </div>
+          ) : (
+            <button
+              onClick={handleDownloadClick}
+              disabled={antivirusDownloaded}
+              className={`shieldsecure-download-btn${antivirusDownloaded ? " downloaded" : ""}`}
+            >
+              <strong>{antivirusDownloaded ? "Zaten indirildi" : "ShieldSecure Setup"}</strong>
+            </button>
+          )}
         </div>
       </div>
-  
-      <div className="download-links">
-          <h3>Mevcut İndirmeler</h3>
-          <ul>
-            <li>
-              <button onClick={handleDownloadClick} disabled={buttonLoading} className="download-button">
-                <strong>{buttonLoading ? <div className="progress-bar"></div> : "ShieldSecure Setup"}</strong>    
-              </button>
-            </li>
-            <li>
-              <button onClick={handleDownloadClick}><strong>ShieldSecure Güncelleme</strong></button>
-            </li>
-            <li>
-              <button><strong>ShieldSecure Kullanım Kılavuzu</strong></button>
-            </li>
-          </ul>
-          {downloadMessage && <p>{downloadMessage}</p>}
-      </div>
 
-    </div>
-      
-      {showPopup && <div className="popup">İndirildi!</div>}
+      {/* Kampanya kutusu (istersen kaldırabilirsin, sade olması için defaultta gizli) */}
+      {/* <div className="shieldsecure-campaign">
+        <h4>🎁 %50 İndirim!</h4>
+        <span>Yıllık ShieldSecure Premium'da fırsatı kaçırmayın.</span>
+      </div> */}
+
+      {showPopup && <div className="shieldsecure-popup">İndirme tamamlandı!</div>}
     </div>
   );
 };

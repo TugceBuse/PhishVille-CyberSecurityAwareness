@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Desktop.css';
 import { useWindowConfig }  from '../../Contexts/WindowConfigContext'
 import { useUIContext } from '../../Contexts/UIContext';
@@ -13,20 +14,43 @@ import { useVirusContext } from '../../Contexts/VirusContext';
 import TaskApp from '../TaskApp/TaskApp';
 import PopupThrower from '../PopupThrower/PopupThrower';
 import RansomwareHash from '../RansomwareHash/RansomwareHash';
+import { useQuestManager } from '../../Contexts/QuestManager';
+import EndGame from '../EndGame/EndGame';
 
 
 const Desktop = ({ hacked, onFormat }) => {
-  const { isWificonnected, isransomware } = useGameContext();
-  const { openWindows, visibleWindows, handleIconClick, zindex, setZindex, windowProps } = useUIContext();
-  const { openedFiles, closeFile, files } = useFileContext();
+  const { isWificonnected, saveSession, Totalscore } = useGameContext();
+  const { openWindows, visibleWindows, handleIconClick, setZindex, windowProps } = useUIContext();
+  const { openedFiles, files } = useFileContext();
   const { addVirus, viruses, removeVirus } = useVirusContext();
-
-  const [showAlert, setShowAlert] = useState(false);
-
+  const { quests, getActiveQuests } = useQuestManager();
   const { windowConfig } = useWindowConfig();
+  const navigate = useNavigate();
+
+  const [showEndGame, setShowEndGame] = useState(false);
+
+  const finishCalled = useRef(false);
+  const [showAlert, setShowAlert] = useState(false);
 
   // Yeni pencere konumlarını tutacak state
   const [windowPositions, setWindowPositions] = useState({});
+
+useEffect(() => {
+    if (getActiveQuests().length === 0 && !finishCalled.current) {
+      finishCalled.current = true;
+      saveSession().then((result) => {
+        // Dilersen başarılıysa bildirim veya yönlendirme yapabilirsin
+        if (result === true) {
+          setShowEndGame(true); // EndGame penceresini aç
+        } else {
+          alert("Oyun kaydedilemedi: " + result);
+        }
+      });
+    }
+    // Eğer tekrar görev açılırsa tetikleyici sıfırlansın
+    if (getActiveQuests().length > 0) finishCalled.current = false;
+  }, [quests, getActiveQuests, saveSession]);
+
 
   useEffect(() => {
     if (!hacked) return;
@@ -96,18 +120,25 @@ const Desktop = ({ hacked, onFormat }) => {
   }, [openWindows, openedFiles]);
 
   const handleDesktopClick = (windowKey) => {
-    const { openHandler } = handlers[windowKey];
-    if (!openHandler) {
-      console.error(`openHandler is not defined for ${windowKey}`);
-      return;
-    }
-    if (!openWindows.includes(windowKey)) {
-      const requiresInternet = windowConfig[windowKey]?.requiresInternet;
-      if (requiresInternet && !isWificonnected) {
-        setShowAlert(true);
-      } else {
-        openHandler();
-        handleIconClick(windowKey);
+    const handler = handlers[windowKey];
+
+    if (handler?.openHandler) {
+      if (!openWindows.includes(windowKey)) {
+        const requiresInternet = windowConfig[windowKey]?.requiresInternet;
+        if (requiresInternet && !isWificonnected) {
+          setShowAlert(true);
+        } else {
+          handler.openHandler();
+          handleIconClick(windowKey);
+        }
+      }
+    } else {
+      // Eğer bir pencere handler'ı yoksa ama dosyaysa
+      const file = files[windowKey] || files.find?.(f => f.id === windowKey);
+      if (file?.onOpen) {
+        file.onOpen();
+      }else {
+        console.error(`No openHandler or onOpen found for ${windowKey}`);
       }
     }
   };
@@ -222,9 +253,18 @@ const Desktop = ({ hacked, onFormat }) => {
         message="Internet bağlantısı bulunamadı"
       />
       {viruses.some(v => v.type === 'adware' || v.type === 'credential-stealer') && <PopupThrower/>}
-      {viruses.some(v => v.type === 'ransomware') && <RansomScreen />}
+      {viruses.some(v => v.type === 'ransomware') && <RansomScreen score={Totalscore} saveSession={saveSession}/>}
       {viruses.some(v => v.type === 'ransomwareHash') && <RansomwareHash />}
       <TaskApp />
+      {showEndGame && (
+      <EndGame
+        title="Simülasyon Tamamlandı!"
+        description="Tüm görevleri tamamladınız. Tebrikler!"
+        score={Totalscore}
+        onRestart={() => { navigate("/") }}
+        onClose={() => navigate("/") }
+      />
+      )}
     </div>
   );
 };

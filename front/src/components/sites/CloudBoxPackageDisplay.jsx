@@ -61,7 +61,7 @@ const CloudBoxPackageDisplay = ({ url }) => {
                     </button>
                   ) : (
                     <button className={styles.downloadBtn} disabled>
-                      İndir
+                      İzin Yok
                     </button>
                   )}
                 </div>

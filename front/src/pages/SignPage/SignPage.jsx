@@ -27,8 +27,24 @@ const SignPage = () => {
     };
   }, []);
 
+  const isValidUsername = (username) => /^[a-zA-Z0-9_]+$/.test(username);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === "username") {
+      if (!isValidUsername(value)) {
+        setLocalError("Kullanıcı adı yalnızca ingilizce harf, rakam, alt çizgi (_) içerebilir.");
+        return;
+      }
+      else if (value.length < 3 || value.length > 15) {
+        setLocalError("Kullanıcı adı 3-15 karakter arasında olmalıdır.");
+        return;
+      }
+      else {
+        setLocalError(null);
+      }
+    }
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,

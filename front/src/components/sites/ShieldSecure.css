@@ -1,209 +1,226 @@
-/* ShieldSecure CSS */
-.download-button {
-    position: relative;
-    width: 150px;
-    height: 50px;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    overflow: hidden;
-  }
-  
-  .progress-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.3);
-    animation: progress 10s linear forwards;
-  }
-  
-  @keyframes progress {
-    0% { width: 0; }
-    100% { width: 100%; }
-  }
-  
-  .popup {
-    position: absolute; 
-    top: 5px; 
-    right: 5px; 
-    background-color: #4caf50;
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-    z-index: 1000;
-  }
-  
-  .download-div-inside{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-  }
-  
-  .download-div-inside h2 {
-    font-size: 24px;
-    margin-top: 10px;
-    color: #dee1dd;
-  }
-  
-  .download-div-inside p {
-    font-size: 16px;
-    color: #dee1dd;
-  }
-  .download-links{
-    width: 50%;
-    min-height: 360px;
-    padding: 20px;
-    background-color: #268364;
-    border-radius: 10px;
-    align-content: center;
-    align-items: center;
-  }
-  
-  .download-links ul {
-    list-style-type: none;
-    padding: 0;
-    color: #dee1dd;
-    align-self: center;
-    justify-self: center;
-  }
-  
-  .download-links li {
-    margin-bottom: 10px;
-    color: #dee1dd;
-    align-self: center;
-    justify-self: center;
-    padding: 5px;
-  }
-  .download-links h3{
-    font-size: 1.5rem;
-    margin-bottom: 80px;
-    color: #dee1dd;
-    align-self: center;
-    justify-self: center;
-  }
-  .download-links button {
-    padding: 10px 20px;
-    font-size: 16px;
-    color: #051a11;
-    background-color: #78f0ce;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    text-decoration: none;
-  }
-  
-  
-  /* Genel Konteyner */
-  .shield-secure-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    width: 50%;
-    margin: 20px auto;
-    padding: 10px;
-  }
-  
-  /* Bilgilendirme Kutusu */
-  .info-box {
-    background-color: #b5e6d7;
-    border: 1px solid #ddd;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 100%;
-  }
-  /* Reklam Kutusu */
-  .ad-box {
-    background-color: #312e26;
-    border: 1px solid #ffeeba;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    margin: 10px auto;
-  }
-  
-  .ad-box h3 {
-    color: #ffffff;
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-  }
-  /* Başlıklar */
-  .info-box h2 {
-    color: #333;
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-  }
-  .ad-box p{
-    color: #ffffff;
-    font-size: 1.2rem;
-    line-height: 1.5;
-  }
-  /* Açıklama Metinleri */
-  .info-box p {
-    color: #555;
-    font-size: 1.2rem;
-    line-height: 1.5;
-  }
-  
-  /* Liste */
-  .info-box ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 15px 0;
-  }
-  
-  .info-box ul li {
-    font-size: 1.1rem;
-    color: #1b1b1b;
-    padding: 5px 0;
-    align-self: center;
-    justify-self: center;
-    text-decoration: underline;
-  }
-  
-  /* Butonlar */
-  .download-btn, .premium-btn {
-    display: inline-block;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    margin-top: 15px;
-    font-size: 1rem;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
-  }
-  
-  .download-btn:hover {
-    background-color: #0056b3;
-    transform: scale(1.05);
-  }
-  
-  .premium-btn {
-    background-color: #28a745;
-  }
-  
-  .premium-btn:hover {
-    background-color: #1e7e34;
-    transform: scale(1.05);
-  }
-  
-  .contentBox{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 20px;
-    width: 100%;
-    margin: 20px auto;
-    padding: 10px;
-  }
+.shieldsecure-modern-container {
+  min-height: 90vh;
+  width: 100%;
+  height: auto;
+  min-height: 580px;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(115deg, #081825 0%, #134a6b 100%);
+  padding: 0;
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+.shieldsecure-main-card {
+  width: 470px;
+  max-width: 95vw;
+  border-radius: 26px;
+  background: linear-gradient(110deg, #101a29 40%, #1e2f43 100%);
+  box-shadow: 0 12px 44px #001e333c, 0 2px 16px #12ffd933;
+  padding: 40px 38px 38px 38px;
+  margin: 60px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 38px;
+  align-items: center;
+}
+
+.shieldsecure-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  padding: 20px;
+}
+.shieldsecure-hero-icon {
+  width: 82px;
+  height: 82px;
+  border-radius: 30%;
+  margin-bottom: 4px;
+  filter: drop-shadow(0 3px 20px #1adbbf99);
+  background: #122c3c;
+}
+.shieldsecure-hero-title {
+  font-size: 2.15rem;
+  color: #14ffc4;
+  font-family: 'Montserrat', 'Segoe UI', sans-serif;
+  letter-spacing: 0.01em;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+}
+.shieldsecure-hero-desc {
+  color: #d8f5ff;
+  font-size: 1.20rem;
+  text-align: center;
+  margin-bottom: 0;
+  font-weight: 500;
+}
+.shieldsecure-green { color: #25e9a2; font-weight: 700; }
+
+.shieldsecure-contentbox {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: stretch;
+  gap: 30px;
+  width: 100%;
+}
+
+.shieldsecure-infobox {
+  background: linear-gradient(111deg, #182234 0%, #133f5a 100%);
+  border-radius: 18px;
+  padding: 26px 18px 26px 28px;
+  color: #b5f6ff;
+  min-width: 180px;
+  min-height: 220px;
+  box-shadow: 0 3px 14px #00fff966, 0 1px 4px #002c1a11;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.shieldsecure-infobox h3 {
+  margin: 0 0 10px 0;
+  color: #31facd;
+  font-size: 1.13rem;
+  font-weight: 800;
+}
+.shieldsecure-infobox ul {
+  margin: 0; padding: 0;
+  list-style: none;
+}
+.shieldsecure-infobox li {
+  margin-bottom: 13px;
+  font-size: 1.11rem;
+  font-family: 'Segoe UI', Arial;
+  position: relative;
+  padding-left: 22px;
+  letter-spacing: 0.01em;
+  font-weight: 500;
+}
+.shieldsecure-infobox li:before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #26ffc6;
+  font-weight: bold;
+  font-size: 1.08rem;
+}
+
+.shieldsecure-downloadbox {
+  background: linear-gradient(111deg, #191d27 0%, #263957 100%);
+  border-radius: 18px;
+  padding: 29px 28px 20px 28px;
+  min-width: 320px;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: center;
+  box-shadow: 0 3px 12px #00e5ff17, 0 1px 6px #2efba91a;
+}
+.shieldsecure-downloadbox h3 {
+  margin: 0 0 11px 0;
+  color: #ffe760;
+  font-size: 1.16rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.shieldsecure-download-btn {
+  width: 210px;
+  background: linear-gradient(93deg, #20fac1 20%, #12c0fb 100%);
+  color: #022f34;
+  border: none;
+  border-radius: 12px;
+  font-weight: 900;
+  font-size: 1.1rem;
+  padding: 18px 10px 16px 10px;
+  margin-top: 12px;
+  cursor: pointer;
+  box-shadow: 0 3px 18px #16f5ff28;
+  transition: background 0.15s, box-shadow 0.18s, transform 0.09s;
+  letter-spacing: 0.01em;
+}
+.shieldsecure-download-btn.downloaded {
+  background: #f0fdff;
+  color: #19b199;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.shieldsecure-download-btn:active { transform: scale(0.97);}
+.shieldsecure-download-btn:disabled { filter: grayscale(80%) opacity(0.5); cursor: not-allowed; }
+
+.shieldsecure-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 10px;
+}
+.shieldsecure-progress-outer {
+  width: 142px;
+  height: 25px;
+  background: #183b3b;
+  border-radius: 13px;
+  border: 2.5px solid #16ecc4;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 0 9px #15f7d6b2;
+}
+.shieldsecure-progress-inner {
+  background: linear-gradient(90deg, #2ffff1 0%, #1e8fff 100%);
+  height: 100%;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  transition: width 0.16s linear;
+  position: relative;
+  justify-content: center;
+}
+.shieldsecure-progress-text {
+  font-weight: bold;
+  color: #05382f;
+  font-size: 1.15rem;
+  z-index: 2;
+  letter-spacing: 0.01em;
+}
+.shieldsecure-cancel-btn {
+  background: #212e39;
+  color: #f9ffe8;
+  border: none;
+  border-radius: 7px;
+  padding: 8px 19px;
+  font-size: 1.01rem;
+  cursor: pointer;
+  font-weight: 700;
+  transition: background 0.18s;
+}
+.shieldsecure-cancel-btn:hover {
+  background: #306583;
+  color: #eaffff;
+}
+
+.shieldsecure-popup {
+  background: linear-gradient(92deg, #19ffab 10%, #00e5fa 100%);
+  color: #062724;
+  position: fixed;
+  height: 40px;
+  top: 19%;
+  left: 78%;
+  transform: translateX(-50%);
+  padding: 8px 40px;
+  border-radius: 12px;
+  font-weight: 800;
+  box-shadow: 0 6px 18px #061d1737;
+  z-index: 99;
+  letter-spacing: 0.03em;
+  animation: shield-popup-fade 0.4s;
+}
+@keyframes shield-popup-fade {
+  from { opacity: 0; transform: translateX(-50%) translateY(30px);}
+  to { opacity: 1; transform: translateX(-50%) translateY(0);}
+}

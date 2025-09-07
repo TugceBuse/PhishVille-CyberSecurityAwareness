@@ -2,10 +2,12 @@ import React, { useState, useRef } from "react";
 import styles from "./OpenLitePDF.module.css";
 import { useWindowConfig } from "../../Contexts/WindowConfigContext";
 import { useQuestManager } from "../../Contexts/QuestManager";
+import { useEventLog } from "../../Contexts/EventLogContext";
 
 const OpenLitePDF = () => {
   const { completeQuest } = useQuestManager();
   const { updateAvailableStatus } = useWindowConfig();
+  const { addEventLog } = useEventLog();
   const [downloading, setDownloading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
@@ -22,6 +24,16 @@ const OpenLitePDF = () => {
           setShowPopup(true);
           updateAvailableStatus("openlitepdfviewer", true);
           completeQuest("pdf_viewer_install");
+          addEventLog({
+            type: "download",
+            questId: "pdf_viewer_install",
+            logEventType: "pdf_viewer_download",
+            value: 10,
+            data: {
+              site: "OpenLitePDF",
+              isFake: false,
+            }
+          });
           setTimeout(() => setShowPopup(false), 3000);
           setDownloading(false);
           return 100;

@@ -4,6 +4,7 @@ import { MakeDraggable } from '../../utils/Draggable';
 import { useUIContext } from '../../Contexts/UIContext';
 import { useGameContext } from '../../Contexts/GameContext';
 import { usePhoneContext } from '../../Contexts/PhoneContext';
+import { useEventLog } from '../../Contexts/EventLogContext';
 import ConnectionOverlay from '../../utils/ConnectionOverlay'; // import path projene göre ayarlanmalı
 
 export const useNovabankApp = () => {
@@ -23,6 +24,7 @@ export const useNovabankApp = () => {
 const NovabankApp = ({ closeHandler, style }) => {
   const { constUser, BankInfo, setBankInfo, cardBalance, isWificonnected } = useGameContext();
   const { generateCodeMessage, lastCodes, clearCode } = usePhoneContext();
+  const { addEventLogOnce } = useEventLog();
 
   const [is2FAwaiting, setIs2FAwaiting] = useState(false);
   const [twoFACodeInput, setTwoFACodeInput] = useState("");
@@ -187,6 +189,21 @@ const NovabankApp = ({ closeHandler, style }) => {
                         setTwoFACodeInput("");
                         setIs2FAwaiting(false);
                         setPage("dashboard");
+                        addEventLogOnce(
+                          "login_novabank",
+                          "rememberMe",
+                          BankInfo.rememberMe,
+                          {
+                            type: "login_novabank",
+                            questId: null,
+                            logEventType: "login",
+                            value: BankInfo.rememberMe ? -5 : 0,
+                            data: {
+                              to: "novabank",
+                              rememberMe: BankInfo.rememberMe,
+                            }
+                          }
+                        );
                       } else {
                         setErrorMessage("⚠ Kod hatalı!");
                         setTimeout(() => setErrorMessage(""), 2000);
@@ -212,22 +229,22 @@ const NovabankApp = ({ closeHandler, style }) => {
         {page === 'dashboard' && (
           <div className={styles.dashboard}>
             <header className={styles.dashboardHeader}>
-              <span className={styles.userInfo}>👋 Hoşgeldin, Onur Yıldız</span>
+              <span className={styles.userInfo}>👋 Hoşgeldin, {constUser.fullName}</span>
             </header>
 
             <section className={styles.accountInfo}>
               <div className={styles.card}>
                 <div className={styles.cardBackground}>
                   <h3 className={styles.cardBankName}>NovaBank</h3>
-                  <div className={styles.cardNumber}>**** **** **** 3456</div>
+                  <div className={styles.cardNumber}>**** **** **** 1064</div>
                   <div className={styles.cardDetails}>
                     <div>
                       <label>Son Kullanım</label>
-                      <p>12/26</p>
+                      <p>{constUser.cardExpiryDate}</p>
                     </div>
                     <div>
                       <label>Kart Sahibi</label>
-                      <p>Onur Yılmaz</p>
+                      <p>{constUser.cardName}</p>
                     </div>
                   </div>
                 </div>

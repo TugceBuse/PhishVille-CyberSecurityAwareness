@@ -4,6 +4,7 @@ import { MakeDraggable } from '../../utils/Draggable';
 import { useUIContext } from '../../Contexts/UIContext';
 import { useFileContext } from '../../Contexts/FileContext';
 import { useGameContext } from '../../Contexts/GameContext';
+import { useEventLog } from '../../Contexts/EventLogContext';
 
 export const useOpenLitePDFApp = () => {
   const { openWindow, closeWindow } = useUIContext();
@@ -21,6 +22,7 @@ export const useOpenLitePDFApp = () => {
 
 const OpenLitePDFApp = ({ closeHandler, style }) => {
   const { openlitePermissions, setOpenlitePermissions } = useGameContext();
+  const { addEventLog } = useEventLog();
   const [page, setPage] = useState(openlitePermissions.permissionsOpened ? 'permissions' : 'viewer');
   const [search, setSearch] = useState('');
   const appRef = useRef(null);
@@ -37,6 +39,42 @@ const OpenLitePDFApp = ({ closeHandler, style }) => {
   const filtered = pdfFiles.filter(file =>
     file.label.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleOpenLiteContinue = () => {
+    let value = 0;
+    let details = {};
+
+    if (openlitePermissions.camera) {
+      value -= 3;
+      details.camera = true;
+    } else {
+      value += 3;
+      details.camera = false;
+    }
+
+    if (openlitePermissions.microphone) {
+      value -= 3;
+      details.microphone = true;
+    } else {
+      value += 3;
+      details.microphone = false;
+    }
+
+    addEventLog({
+      type: "permissions",
+      questId: "pdf_viewer_install",
+      logEventType: "permissions",
+      value,
+      data: {
+        app: "OpenLitePDF",
+        details
+      }
+     
+    });
+
+    setOpenlitePermissions(prev => ({ ...prev, permissionsOpened: false }));
+    setPage('viewer');
+  };
 
   return (
     <div className={styles.appWindow} style={style} ref={appRef} data-window="openlitepdfviewer">
@@ -76,8 +114,7 @@ const OpenLitePDFApp = ({ closeHandler, style }) => {
               </label>
             </form>
             <button className={styles.continueBtn} onClick={() => {
-              setOpenlitePermissions(prev => ({ ...prev, permissionsOpened: false }));
-              setPage('viewer');
+              handleOpenLiteContinue();
             }}>
               Devam Et
             </button>

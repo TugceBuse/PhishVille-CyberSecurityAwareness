@@ -10,6 +10,8 @@ export const TimeProvider = ({ children }) => {
     now.setHours(9, 0, 0, 0); // saat: 09:00:00
     return new Date(now);
   });
+  //Oyun başlangıcının gerçek tarihi
+  const realStartRef = useRef(new Date());
 
   // Geçen oyun saniyesi
   const [seconds, setSeconds] = useState(0);
@@ -25,18 +27,18 @@ export const TimeProvider = ({ children }) => {
 
   useEffect(() => {
     secondsRef.current = seconds;
-    // console.log(`Current game seconds: ${seconds}`);
-    // console.log(`Current game date: ${gameDate.toISOString()}`);
-    // console.log(`Game started at: ${gameStart.toISOString()}`);
   }, [seconds]);
+
+  // Oyun içi geçen ms (0'dan başlar, her saniye 1000 artar)
+  const gameMs = seconds * 1000;
 
   // Anlık oyun zamanı Date objesi olarak (her saniye güncellenir)
   const [gameDate, setGameDate] = useState(new Date(gameStart.getTime()));
   useEffect(() => {
-    setGameDate(new Date(gameStart.getTime() + seconds * 1000));
-  }, [seconds, gameStart]);
+    setGameDate(new Date(gameStart.getTime() + gameMs));
+  }, [gameMs, gameStart]);
 
-  // Göreceli tarih fonksiyonu (opsiyonel, eski fonksiyondan aynen alınabilir)
+  // getRelativeDate ve getDateFromseconds fonksiyonları aynı kalabilir
   const getRelativeDate = ({ days = 0, months = 0, hours = 0, minutes = 0 }) => {
     const newDate = new Date(gameStart.getTime());
     newDate.setMonth(newDate.getMonth() + months);
@@ -58,6 +60,8 @@ export const TimeProvider = ({ children }) => {
       secondsRef,
       gameStart,
       gameDate,
+      gameMs,
+      realStartRef,
       getRelativeDate,
       getDateFromseconds
     }}>

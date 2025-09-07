@@ -11,6 +11,7 @@ export const PhoneProvider = ({ children }) => {
   const { openWindow } = useUIContext();
   const { isWificonnected } = useSecurityContext();
   const { gameDate, getRelativeDate } = useTimeContext();
+  const [isPhoneConnected, setIsPhoneConnected] = useState(false);
 
   // Statik mesajlar
   const initialMessages = [
@@ -72,7 +73,7 @@ export const PhoneProvider = ({ children }) => {
 
   // Wifi geldiğinde pending’i boşaltır
   useEffect(() => {
-    if (isWificonnected && pendingMessages.length > 0) {
+    if (isPhoneConnected && isWificonnected && pendingMessages.length > 0) {
       pendingMessages.forEach(({ id, sender, content, sendTime, showNotification }) => {
         const newMessage = {
           id,
@@ -110,7 +111,7 @@ export const PhoneProvider = ({ children }) => {
       });
       setPendingMessages([]); // queue'yu temizle
     }
-  }, [isWificonnected, pendingMessages, addNotification, openWindow, markAsRead]);
+  }, [isWificonnected, pendingMessages, addNotification, openWindow, markAsRead, isPhoneConnected]);
 
   const markMessageAsRead = (id) => {
     if (!readMessages.includes(id)) {
@@ -162,7 +163,9 @@ export const PhoneProvider = ({ children }) => {
         readMessages,
         markMessageAsRead,
         getUnreadCount,
-        pendingMessages, // istersen kullanabilirsin
+        pendingMessages, 
+        isPhoneConnected,
+        setIsPhoneConnected,
       }}
     >
       {children}

@@ -4,6 +4,8 @@ import { MakeDraggable } from "../../utils/Draggable";
 import { useUIContext } from "../../Contexts/UIContext";
 import sites from "../../constants/sites";
 import { useGameContext } from "../../Contexts/GameContext";
+import { useEventLog } from "../../Contexts/EventLogContext";
+import ResetPassword from "../sites/ResetPassword";
 
 export const useBrowser = () => {
   const { openWindow, closeWindow } = useUIContext();
@@ -17,6 +19,7 @@ const CachedComponents = {};
 
 const Browser = ({ closeHandler, style }) => {
   // 1. windowProps'u oku
+  const { addEventLogOnce } = useEventLog(); 
   const { windowProps } = useUIContext();
   const browserProps = windowProps?.browser || {};
 
@@ -24,7 +27,7 @@ const Browser = ({ closeHandler, style }) => {
   const [initialized, setInitialized] = useState(false);
 
   // 3. Varsayılan url/props
-  const defaultUrl = browserProps.url || "https://www.google.com";
+  const defaultUrl = browserProps.initialUrl || browserProps.url || "https://www.searchill.com";
   const [url, setUrl] = useState(defaultUrl);
   const [currentUrl, setCurrentUrl] = useState(defaultUrl);
   const [loading, setLoading] = useState(false);
@@ -49,22 +52,43 @@ const Browser = ({ closeHandler, style }) => {
   // ---- 5. EN KRİTİK KISIM: Pencere ilk açıldığında (ya da yeni props geldiğinde) güncelle
   useEffect(() => {
     if (!initialized) {
-      if (browserProps.url) {
-        setUrl(browserProps.url);
-        setCurrentUrl(browserProps.url);
-        setHistory([browserProps.url]);
-        setCurrentIndex(0);
-      }
+      // Öncelik: initialUrl > url > searchill
+      const chosenUrl =
+        browserProps.initialUrl ||
+        browserProps.url ||
+        "https://www.searchill.com";
+
+      setUrl(chosenUrl);
+      setCurrentUrl(chosenUrl);
+      setHistory([chosenUrl]);
+      setCurrentIndex(0);
+
       if (browserProps.shippingCompany || browserProps.trackingNo) {
         setExtraProps({
           shippingCompany: browserProps.shippingCompany,
           trackingNo: browserProps.trackingNo,
         });
+      } else {
+        setExtraProps(null);
       }
+
       setInitialized(true); // Sadece bir kere çalışsın
+    } else {
+      if (browserProps.url && browserProps.url !== currentUrl) {
+        setUrl(browserProps.url);
+        setCurrentUrl(browserProps.url);
+        setHistory(prev => [...prev, browserProps.url]);
+        setCurrentIndex(prev => prev + 1);
+      }
     }
     // eslint-disable-next-line
-  }, [browserProps.url, browserProps.shippingCompany, browserProps.trackingNo, initialized]);
+  }, [
+    browserProps.initialUrl,
+    browserProps.url,
+    browserProps.shippingCompany,
+    browserProps.trackingNo,
+    initialized
+  ]);
 
   // ---- 6. (DEĞİŞMEDİ) Event ile link tıklanınca yönlendirme
   useEffect(() => {
@@ -105,10 +129,27 @@ const Browser = ({ closeHandler, style }) => {
   const handleUrlChange = (e) => setUrl(e.target.value);
   const handleKeyDown = (e) => e.key === "Enter" && handleGoClick(e.target.value);
 
-  const handleGoogleSearch = async (searchText, addToHistory = true) => {
+  const handleSearchillSearch = async (searchText, addToHistory = true) => {
     if (!searchText || !searchText.trim()) return;
     const searchQuery = normalizeText(searchText.trim());
-    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+
+    addEventLogOnce(
+      "browser_search",      // type
+      "searchQuery",         // unique alan
+      searchQuery,           // value
+      {
+        type: "browser_search",
+        questId: null,
+        logEventType: "browser_search",
+        value: 0,
+        data: {
+          keyword: searchText
+        }
+      }
+    );
+
+
+    const searchUrl = `https://www.searchill.com/search?q=${encodeURIComponent(searchQuery)}`;
     setUrl(searchUrl);
     await startLoading();
     setCurrentUrl(searchUrl);
@@ -143,6 +184,29 @@ const Browser = ({ closeHandler, style }) => {
       }
     }
 
+    let value = 0;
+    let reason = "normal";
+    if (matchedSite?.isSponsored) {
+      value = -4;
+      reason = "sponsored";
+    }
+    addEventLogOnce(
+      "browser_visit",
+      "visitedUrl",
+      finalUrl,
+      {
+        type: "browser_visit",
+        questId: null,
+        logEventType: "browser_visit",
+        value,
+        data: {
+          url: finalUrl,
+          isSponsored: matchedSite?.isSponsored || false,
+          reason,
+        }
+      }
+    );
+
     setCurrentUrl(matchedSite ? (dynamicUrl || finalUrl) : "404");
     setUrl(finalUrl);
 
@@ -154,16 +218,16 @@ const Browser = ({ closeHandler, style }) => {
   };
 
   const goHome = async () => {
-    const googleUrl = "https://www.google.com";
-    setUrl(googleUrl);
+    const searchillUrl = "https://www.searchill.com";
+    setUrl(searchillUrl);
     await startLoading();
-    setCurrentUrl(googleUrl);
-    setHistory([...history.slice(0, currentIndex + 1), googleUrl]);
+    setCurrentUrl(searchillUrl);
+    setHistory([...history.slice(0, currentIndex + 1), searchillUrl]);
     setCurrentIndex(currentIndex + 1);
   };
 
   useEffect(() => {
-    if (currentUrl.startsWith("https://www.google.com/search?q=")) {
+    if (currentUrl.startsWith("https://www.searchill.com/search?q=")) {
       const searchQuery = normalizeText(decodeURIComponent(currentUrl.split("search?q=")[1]));
       const filteredSites = Object.entries(sites)
         .filter(([key, site]) =>
@@ -229,18 +293,18 @@ const Browser = ({ closeHandler, style }) => {
             </div>
     }
 
-    if (currentUrl.startsWith("https://www.google.com/search?q=")) {
+    if (currentUrl.startsWith("https://www.searchill.com/search?q=")) {
       const searchedText = decodeURIComponent(currentUrl.split("search?q=")[1]);
       return (
         <div className="download-pages">
           <div className='searchPart' style={{width:500, height:40, marginBottom:40}}>
-            <img src="./icons/search.png" alt="Search Logo" onClick={() => handleGoogleSearch(searchInputRef.current.value) } />
+            <img src="./icons/search.png" alt="Search Logo" onClick={() => handleSearchillSearch(searchInputRef.current.value) } />
             <input 
               type="text"
               defaultValue={searchedText}
-              placeholder="Google'da Ara"
+              placeholder="SearChill'da Ara"
               ref={searchInputRef}
-              onKeyDown={(e) => e.key === "Enter" && handleGoogleSearch(e.target.value)} 
+              onKeyDown={(e) => e.key === "Enter" && handleSearchillSearch(e.target.value)} 
             />
 
             <div className='searchPart_right'>
@@ -296,17 +360,44 @@ const Browser = ({ closeHandler, style }) => {
       );
     }
 
-    if (currentUrl === "https://www.google.com") {
+    if (currentUrl.startsWith("http://reset/")) {
+      try {
+         window.currentBrowserUrl = currentUrl;
+
+        const dummyUrl = currentUrl.replace("http://", "http://dummy.");
+        const urlObj = new URL(dummyUrl);
+        // 1. siteKey'i al
+        const siteKey = urlObj.pathname.replace("/", "").toLowerCase();
+
+        // 2. siteKey ile eşleşen siteyi, sites objesinin değerlerinden title'a göre bul
+        const siteEntry = Object.entries(sites).find(
+          ([_, config]) => config?.title?.toLowerCase() === siteKey
+        );
+
+        // 3. siteName'i al veya bilinmeyen fallback
+        const siteName = siteEntry?.[1]?.title || "Bilinmeyen";
+
+        return (
+          <ResetPassword
+            siteName={siteName}
+          />
+        );
+      } catch (e) {
+        return <div className="not-found">404 - Geçersiz sıfırlama bağlantısı</div>;
+      }
+    }
+
+    if (currentUrl === "https://www.searchill.com") {
       return (
         <div className="firstPartOfBrowser">
-          <h1>Google</h1>
+          <h1>SearChill</h1>
           <div className="searchPart"> 
-            <img src="./icons/search.png" alt="Search Logo" onClick={() => handleGoogleSearch(searchInputRef.current.value) } />
+            <img src="./icons/search.png" alt="Search Logo" onClick={() => handleSearchillSearch(searchInputRef.current.value) } />
             <input 
               type="text" 
-              placeholder="Google'da Ara"
+              placeholder="SearChill'da Ara"
               ref={searchInputRef}
-              onKeyDown={(e) => e.key === "Enter" && handleGoogleSearch(e.target.value)} 
+              onKeyDown={(e) => e.key === "Enter" && handleSearchillSearch(e.target.value)} 
             />
             <div className="searchPart_right">
               <img src="./icons/keyboard.png" alt="Keyboard Logo" />

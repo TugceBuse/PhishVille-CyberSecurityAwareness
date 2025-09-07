@@ -3,6 +3,7 @@ import { useFileContext } from "../../Contexts/FileContext";
 import { useGameContext } from "../../Contexts/GameContext";
 import styles from "./OpenDrop.module.css";
 import { useQuestManager } from "../../Contexts/QuestManager";
+import { useEventLog } from "../../Contexts/EventLogContext";
 
 const generateLink = (label) =>
   "https://opendrop.com/file/" +
@@ -11,6 +12,7 @@ const generateLink = (label) =>
 
 const OpenDrop = () => {
   const { files } = useFileContext();
+  const { addEventLog } = useEventLog();
   const { failQuest } = useQuestManager();
   const [allBackedUpFiles, setAllBackedUpFiles] = useState([]);
   const allBackedUpLabels = (allBackedUpFiles ?? []).map(file => file.label);
@@ -42,6 +44,16 @@ const OpenDrop = () => {
         setUploading(false);
         setShowModal(false);
         failQuest("file_backup");
+        addEventLog({
+          type: "backup",
+          questId: "file_backup",
+          logEventType: "cloud_backup",
+          value: -10,
+          data: {
+            site: "OpenDrop",
+            isFake: false,
+          }
+        });
         // Dosyaları public olarak context'e ekle
         const uploaded = downloadsFiles.map(f => ({
           ...f,

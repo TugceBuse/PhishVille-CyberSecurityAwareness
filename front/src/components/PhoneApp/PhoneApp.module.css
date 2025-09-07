@@ -305,3 +305,50 @@
   border-bottom: 1px solid #444;
   letter-spacing: 0.4px;
 }
+
+/* Simülasyon başlangıcında telefon bağlantısı kurulması için gereken CSS */
+.connectScreen {
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 10px 22px 10px;
+  text-align: center;
+  gap: 14px;
+}
+.connectBtn {
+  margin: 18px auto 7px auto;
+  padding: 13px 44px;
+  border-radius: 13px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(90deg, #b14d40 0%, #d68d83 100%);
+  border: none;
+  box-shadow: 0 1px 10px #6ac8a588;
+  transition: filter 0.18s;
+  cursor: pointer;
+}
+.connectBtn:disabled {
+  filter: grayscale(0.6) opacity(0.7);
+  cursor: not-allowed;
+}
+.connectNote {
+  font-size: 0.93rem;
+  color: white;
+  margin-top: 4px;
+}
+.connectSpinner {
+  border: 4px solid #d6fff7;
+  border-top: 4px solid #30d5c8;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  margin: 14px auto 0 auto;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}

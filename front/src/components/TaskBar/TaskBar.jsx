@@ -11,6 +11,8 @@ import { useNotificationContext } from '../../Contexts/NotificationContext';
 import { useTimeContext } from '../../Contexts/TimeContext';
 import { useSecurityContext } from '../../Contexts/SecurityContext';
 import { useQuestManager } from '../../Contexts/QuestManager';
+import { useEventLog } from '../../Contexts/EventLogContext';
+
 
 const TaskBar = ({ windowConfig, hacked, onFormat }) => {
   const [showStartMenu, setShowStartMenu] = useState(false);
@@ -25,8 +27,10 @@ const TaskBar = ({ windowConfig, hacked, onFormat }) => {
   const [showSystemSettings, setShowSystemSettings] = useState(false);
   const [wifiname, setWifiname] = useState('');
 
-  const pass = "1234";
+  const pass = "XYZ2025";
   const navigate = useNavigate();
+
+  const { addEventLogOnce } = useEventLog();
   const { gameDate } = useTimeContext();
 
   const { completeQuest } = useQuestManager();
@@ -93,28 +97,61 @@ const TaskBar = ({ windowConfig, hacked, onFormat }) => {
   };
 
   const handleWifiClick = (wifiName, requiresPassword) => {
-    if (requiresPassword) {
-      setSelectedWifi(wifiName);
-      setShowPasswordPrompt(true);
-    } else {
-      setIsWificonnected(true);
-      setWifiname(wifiName);
-      completeQuest("connect_wifi");
-      completeQuest("login_mailbox");
-    }
-  };
+  if (requiresPassword) {
+    setSelectedWifi(wifiName);
+    setShowPasswordPrompt(true);
+  } else {
+    setIsWificonnected(true);
+    setWifiname(wifiName);
+    // Her wifi için sadece ilk bağlantıda log tut
+    addEventLogOnce(
+      "wifi_connect",         // type
+      "wifi",                 // uniqueField
+      wifiName,               // uniqueValue
+      {
+        type: "wifi_connect",
+        questId: "wifi_connect",
+        logEventType: "wifi",
+        value: -10,
+        data: {
+          wifi: wifiName,
+          isPrivate: false
+        }
+      }
+    );
+    completeQuest("wifi_connect");
+  }
+};
 
-  const handlePasswordSubmit = (e) => {
-    e.preventDefault();
-    const password = e.target.elements.password.value;
-    setShowPasswordPrompt(false);
-    if (password === pass) {
-      setIsWificonnected(true);
-    } else {
-      setShowPassAlert(true);
-      setIsWificonnected(false);
-    }
-  };
+const handlePasswordSubmit = (e) => {
+  e.preventDefault();
+  const password = e.target.elements.password.value;
+  setShowPasswordPrompt(false);
+  if (password === pass) {
+    setIsWificonnected(true);
+    setWifiname(selectedWifi);
+    completeQuest("wifi_connect");
+    addEventLogOnce(
+      "wifi_connect",
+      "wifi",
+      selectedWifi,
+      {
+        type: "wifi_connect",
+        questId: "wifi_connect",
+        logEventType: "wifi",
+        value: 10,
+        data: {
+          wifi: selectedWifi,
+          isPrivate: true
+        }
+      }
+    );
+  } else {
+    setShowPassAlert(true);
+    setIsWificonnected(false);
+  }
+};
+
 
   // Taskbarda bir ikona tıklandığında pencereyi öne al/gizle
   const handleIconClickWithVisibility = (windowName) => {
@@ -383,11 +420,11 @@ const TaskBar = ({ windowConfig, hacked, onFormat }) => {
           {showWifiList && (
             <div className="wifi-list">
               <ul>
-                <li onClick={() => handleWifiClick('WiFi Network 1', true)}>
-                  XYZCompany Network 1 <img src="/icons/lock.png" alt="Lock Icon" />
+                <li onClick={() => handleWifiClick('XYZCompany Network', true)}>
+                  XYZCompany Network<img src="/icons/lock.png" alt="Lock Icon" />
                 </li>
-                <li onClick={() => handleWifiClick('WiFi Network 2', false)}>WiFi Network 2</li>
-                <li onClick={() => handleWifiClick('WiFi Network 3', false)}>WiFi Network 3</li>
+                <li onClick={() => handleWifiClick('Avoa Cafe Network', false)}>Avoa Cafe Network</li>
+                <li onClick={() => handleWifiClick('QWERTY Network', false)}>QWERTY Network</li>
               </ul>
             </div>
           )}

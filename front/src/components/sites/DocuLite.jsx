@@ -3,10 +3,12 @@ import styles from './DocuLite.module.css';
 import { useWindowConfig } from '../../Contexts/WindowConfigContext';
 import FeatureCard from './FeatureCard'; 
 import { useQuestManager } from "../../Contexts/QuestManager";
+import { useEventLog } from "../../Contexts/EventLogContext";
 
 const DocuLiteSite = () => {
   const { updateAvailableStatus } = useWindowConfig();
   const { completeQuest } = useQuestManager();
+  const { addEventLog } = useEventLog();
   const [downloading, setDownloading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
@@ -23,6 +25,16 @@ const DocuLiteSite = () => {
           setShowPopup(true);
           updateAvailableStatus("pdfviewer", { available: true });
           completeQuest("pdf_viewer_install");
+          addEventLog({
+            type: "download",
+            questId: "pdf_viewer_install",
+            logEventType: "pdf_viewer_download",
+            value: 10,
+            data: {
+              site: "DocuLitePDFViewer",
+              isFake: false,
+            }
+          });
           setTimeout(() => setShowPopup(false), 3000);
           setDownloading(false);
           return 100;

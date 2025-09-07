@@ -1,14 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useUIContext } from './UIContext';
 import NovaBankAppSetup from '../exefiles/NovaBankAppSetup/NovaBankAppSetup';
-import { useQuestManager } from './QuestManager';
 
 const FileContext = createContext();
 
 export const FileContextProvider = ({ children }) => {
     const { openWindow, closeWindow } = useUIContext();
-    const { setIsTaskAppInstalled, completeQuest } = useQuestManager();
-
+    
     // Standart dosya şeması
 const defaultFileSchema = {
     available: true,
@@ -43,6 +41,7 @@ const defaultFileSchema = {
             icon: "/icons/txt.png", 
             content: "/files/benioku.txt",
             locked: false,
+            hash: " ",
         },
         rapor_2025: { 
             available: false, 
@@ -58,6 +57,7 @@ const defaultFileSchema = {
             icon: "/icons/docx.png", 
             specialView : "enableContentDocx" ,
             locked: false,
+            hash: " ",
         },
         sahtefatura: { 
             available: false,
@@ -73,9 +73,10 @@ const defaultFileSchema = {
             icon: "/icons/docx.png", 
             specialView: "enableContentDocx",
             locked: false,
+            hash: " ",
         },
         antivirussetup: { 
-            available: true,
+            available: false,
             quarantined: false, 
             clickable: true,
             infected: false,
@@ -120,12 +121,12 @@ const defaultFileSchema = {
             location: "downloads", 
             label: "TaskApp Kurulumu", 
             icon: "/icons/task-list.png", 
-            exeType: "taskappsetup",
+            exeType: "taskappsetupf",
             virusType: "clown",
             detectable: false,
         },
         officedoc: { 
-            available: true,
+            available: false,
             quarantined: false, 
             clickable: true,
             infected: false, 
@@ -138,7 +139,7 @@ const defaultFileSchema = {
             locked: false,
         },
         photo1: { 
-            available: true,
+            available: false,
             quarantined: false, 
             clickable: true,
             infected: false, 
@@ -150,7 +151,7 @@ const defaultFileSchema = {
             content: "/images/office.jpg"
         },
         photo12: { 
-            available: true,
+            available: false,
             quarantined: false,
             clickable: true, 
             infected: false, 
@@ -162,7 +163,7 @@ const defaultFileSchema = {
             content: "/images/office.jpg"
         },
         photo2: { 
-            available: true,
+            available: false,
             quarantined: false, 
             clickable: true,
             infected: false, 
@@ -186,6 +187,7 @@ const defaultFileSchema = {
             icon: "/icons/pdf.png",
             content: "/files/Kişisel_Kullanıcı_Bilgileri.txt",
             locked: false,
+            hash: " ",
         },
         issozlesmesi: {
             available: false,
@@ -200,6 +202,7 @@ const defaultFileSchema = {
             icon: "/icons/pdf.png",
             content: "/files/İş_Sözleşmesi.txt",
             locked: false,
+            hash: " ",
         },
         gizlilikpolitikasi: {
             available: false,
@@ -214,6 +217,7 @@ const defaultFileSchema = {
             icon: "/icons/pdf.png",
             content: "/files/Gizlilik_Politikası.txt",
             locked: false,
+            hash: " ",
         },
         personelelkitabi: {
             available: false,
@@ -228,6 +232,7 @@ const defaultFileSchema = {
             icon: "/icons/pdf.png",
             content: "/files/Personel_El_Kitabı.txt",
             locked: false,
+            hash: " ",
         }
     });
 
@@ -296,16 +301,6 @@ const defaultFileSchema = {
     useEffect(() => {
         console.log('openedFiles:', openedFiles);
     }, [openedFiles]);
-
-    useEffect(() => {
-        // TaskApp kurulum dosyası açıldığında, TaskApp uygulamasının kurulu olduğunu belirt
-        if (files.taskappsetup.available) {
-            setIsTaskAppInstalled(true);
-            completeQuest('download_taskapp');
-        } else {
-            setIsTaskAppInstalled(false);
-        }
-    }, [files.taskappsetup, setIsTaskAppInstalled]);
 
     // 📌 Dosya açma fonksiyonu
     const openFile = (fileName, theme) => {

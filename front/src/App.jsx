@@ -11,6 +11,7 @@ import VerifyEmail from './pages/VerifyEmail/VerifyEmail';
 import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
 import ResetPassword from './pages/ResetPassword/ResetPassword';
 import ScrollToTop from './utils/ScrollToTop';
+import MyGames from './pages/MyGames/MyGames';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/mygames" element={<MyGames />} />
           <Route path="*" element={<h1>404 Not Found</h1>} />
         </Routes>
       </BrowserRouter>

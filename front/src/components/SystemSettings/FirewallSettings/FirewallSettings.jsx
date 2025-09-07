@@ -1,6 +1,6 @@
-
 import styles from './FirewallSettings.module.css';
-import { useVirusContext } from '../../../Contexts/VirusContext';
+import { useSecurityContext } from '../../../Contexts/SecurityContext';
+import { useEventLog } from '../../../Contexts/EventLogContext';
 
 const FirewallSettings = ({ onClose }) => {
   const { 
@@ -10,7 +10,70 @@ const FirewallSettings = ({ onClose }) => {
     setPrivateNetworkEnabled, 
     publicNetworkEnabled, 
     setPublicNetworkEnabled
-  } = useVirusContext();
+  } = useSecurityContext();
+
+  const { addEventLogOnChange } = useEventLog(); // 🔔 Event log context'i ekle
+
+  // Her biri için ayrı handler fonksiyonu:
+  const handleDomainToggle = () => {
+    const newValue = !domainNetworkEnabled;
+    setDomainNetworkEnabled(newValue);
+    addEventLogOnChange(
+      "toggle_firewall_domain",
+      "state",
+      newValue,
+      {
+        type: "toggle_firewall_domain",
+        questId: "firewall_settings", // quest varsa!
+        logEventType: "firewall",
+        value: newValue ? 5 : -5,
+        data: {
+          profile: "domain",
+          state: newValue,
+        }
+      }
+    );
+  };
+
+  const handlePrivateToggle = () => {
+    const newValue = !privateNetworkEnabled;
+    setPrivateNetworkEnabled(newValue);
+    addEventLogOnChange(
+      "toggle_firewall_private",
+      "state",
+      newValue,
+      {
+        type: "toggle_firewall_private",
+        questId: "firewall_settings",
+        logEventType: "firewall",
+        value: newValue ? 5 : -5,
+        data: {
+          profile: "private",
+          state: newValue,
+        }
+      }
+    );
+  };
+
+  const handlePublicToggle = () => {
+    const newValue = !publicNetworkEnabled;
+    setPublicNetworkEnabled(newValue);
+    addEventLogOnChange(
+      "toggle_firewall_public",
+      "state",
+      newValue,
+      {
+        type: "toggle_firewall_public",
+        questId: "firewall_settings",
+        logEventType: "firewall",
+        value: newValue ? 5 : -5,
+        data: {
+          profile: "public",
+          state: newValue,
+        }
+      }
+    );
+  };
 
   return (
      <div className={styles.firewallContainer}>
@@ -27,7 +90,7 @@ const FirewallSettings = ({ onClose }) => {
             <input
               type="checkbox"
               checked={domainNetworkEnabled}
-              onChange={() => setDomainNetworkEnabled(prev => !prev)}
+              onChange={handleDomainToggle}
               className={styles.switchInput}
             />
             <span className={styles.switchSlider}></span>
@@ -52,7 +115,7 @@ const FirewallSettings = ({ onClose }) => {
             <input
               type="checkbox"
               checked={privateNetworkEnabled}
-              onChange={() => setPrivateNetworkEnabled(prev => !prev)}
+              onChange={handlePrivateToggle}
               className={styles.switchInput}
             />
             <span className={styles.switchSlider}></span>
@@ -77,7 +140,7 @@ const FirewallSettings = ({ onClose }) => {
             <input
               type="checkbox"
               checked={publicNetworkEnabled}
-              onChange={() => setPublicNetworkEnabled(prev => !prev)}
+              onChange={handlePublicToggle}
               className={styles.switchInput}
             />
             <span className={styles.switchSlider}></span>
@@ -96,7 +159,6 @@ const FirewallSettings = ({ onClose }) => {
           </p>
         </div>
       </div>
-
     </div>
   );
 };

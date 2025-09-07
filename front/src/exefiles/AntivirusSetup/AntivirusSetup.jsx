@@ -5,6 +5,8 @@ import { useFileContext } from '../../Contexts/FileContext';
 import { useWindowConfig } from '../../Contexts/WindowConfigContext';
 import { useVirusContext } from '../../Contexts/VirusContext';
 import { useGameContext } from '../../Contexts/GameContext';
+import { useQuestManager } from '../../Contexts/QuestManager';
+import { useEventLog } from '../../Contexts/EventLogContext';
 
 export const useSetup = () => {
     const { toggleWindow } = useUIContext();
@@ -27,10 +29,11 @@ const AntivirusSetup = ({ file, fileName }) => {
 
     const [step, setStep] = useState(1);
     const [buttonLoading, setButtonLoading] = useState(false);
+    const { addEventLog } = useEventLog();
+    const { completeQuest } = useQuestManager();
     const { closeFile } = useFileContext();
     const { updateAvailableStatus } = useWindowConfig();
     const { windowConfig } = useWindowConfig();
-    const { setRealTimeProtection } = useVirusContext();
 
     const handleNextStep = () => {
         if (windowConfig.antivirus.available) {
@@ -51,7 +54,14 @@ const AntivirusSetup = ({ file, fileName }) => {
             setButtonLoading(false); 
             setStep(step + 1);
             updateAvailableStatus('antivirus', true);
-            setRealTimeProtection(true); // Antivirüs açıldı
+            completeQuest('antivirus_install'); // Antivirüs kurulumu tamamlandıktan sonra görevi tamamla
+            addEventLog({
+                type: 'antivirus_install',
+                questId: 'antivirus_install',
+                logEventType: 'setup',
+                value: 0,
+                data: null
+            });
         }, 5000);
        
     };

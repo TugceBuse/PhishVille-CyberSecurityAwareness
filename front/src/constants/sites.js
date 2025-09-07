@@ -1,6 +1,6 @@
 const sites = {
-  "https://google.com": { 
-    title: "Google", 
+  "https://searchill.com": { 
+    title: "SearChill", 
     type: "search", 
     statement: "Dünyanın en popüler arama motoru.",
     searchKeys: [],
@@ -9,8 +9,8 @@ const sites = {
     seoScore: 100
   },
 
-  "https://google.com/search?q=": { 
-    title: "Google Search", 
+  "https://searchill.com/search?q=": { 
+    title: "SearChill Search", 
     type: "search-results", 
     statement: "Arama sonuçlarınızı görüntüleyin.",
     searchKeys: [],
@@ -139,7 +139,7 @@ const sites = {
     component: "CyberSentinel",
     statement: "Kurumsal güvenlik ve antivirüs hizmetleri sunuyoruz.",
     searchKeys: ["antivirus", "firewall", "malware", "cyber", "cybersentinel", "sentinel"],
-    clickable: true,
+    clickable: false,
     protocol: "https",
     isSponsored: false,
     seoScore: 70
@@ -436,7 +436,14 @@ const sites = {
   isSponsored: true,
   seoScore: 7
 },
-
+"^http://reset/([a-zA-Z0-9-]+)\\?email=[^&]+(&.*)?$": {
+  "title": "Şifre Sıfırlama",
+  "type": "component",
+  "component": "ResetPassword",
+  "statement": "Yeni şifrenizi belirleyin.",
+  "clickable": true,
+  "protocol": "http"
+}
 };
 
 export default sites;

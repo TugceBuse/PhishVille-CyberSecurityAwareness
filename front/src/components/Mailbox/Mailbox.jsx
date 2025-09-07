@@ -6,7 +6,9 @@ import { useMailContext } from '../../Contexts/MailContext';
 import { useGameContext } from '../../Contexts/GameContext';
 import { resetScroll } from '../../utils/resetScroll';
 import { useNotificationContext } from '../../Contexts/NotificationContext';
-import ConnectionOverlay from '../../utils/ConnectionOverlay'; // <-- import eklendi
+import ConnectionOverlay from '../../utils/ConnectionOverlay';
+import { useQuestManager } from '../../Contexts/QuestManager';
+import { useEventLog } from '../../Contexts/EventLogContext';
 
 export const useMailbox = () => {
   const { openWindow, closeWindow } = useUIContext();
@@ -23,8 +25,10 @@ const Mailbox = ({ closeHandler, style }) => {
 
   const [activeTab, setActiveTab] = useState('inbox');
   const [showSpamMenu, setShowSpamMenu] = useState(false);
-  
+
   const { removeNotification } = useNotificationContext();
+  const { addEventLogOnce, addEventLog } = useEventLog();
+  const { completeQuest } = useQuestManager();
 
   const {
     inboxMails, setInboxMails,
@@ -33,7 +37,7 @@ const Mailbox = ({ closeHandler, style }) => {
     selectedMail, setSelectedMail,
   } = useMailContext();
 
-  const { isWificonnected } = useGameContext();
+  const { isWificonnected, constUser, isMailboxLoggedIn, setIsMailboxLoggedIn } = useGameContext();
   const contentRef = useRef(null);
 
   const unreadCountMail = inboxMails.filter(mail => !mail.readMail).length;
@@ -56,11 +60,40 @@ const Mailbox = ({ closeHandler, style }) => {
         )
       );
       removeNotification(mail.id);
+      addEventLog({
+        type: "mail_open",
+        questId: null,
+        logEventType: "mail_read",
+        value: 0, // puan yok
+        data: {
+          mailId: mail.id,
+          title: mail.title,
+          from: mail.from,
+        }
+      });
     } else if (activeTab === "spam") {
       setSpamboxMails(prev =>
         prev.map(m =>
           m.id === mail.id ? { ...m, readMail: true } : m
         )
+      );
+
+      // SPAM MAİL TIKLANDI: Logla ve puan düşür!
+      addEventLogOnce(
+        "spam_mail_open",      // type
+        "mailId",              // uniqueField
+        mail.id,               // uniqueValue (her mail için tek)
+        {
+          type: "spam_mail_open",
+          questId: null, // varsa questId ekle
+          logEventType: "spam_mail",
+          value: -4,
+          data: {
+            mailId: mail.id,
+            title: mail.title,
+            from: mail.from,
+          }
+        }
       );
     }
   };
@@ -83,6 +116,97 @@ const Mailbox = ({ closeHandler, style }) => {
     });
   }
 
+  // ----------------- GİRİŞ EKRANI STATE'İ VE FONKSİYONU -----------------
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (
+      loginEmail.trim().toLowerCase() === constUser.email.toLowerCase() &&
+      loginPassword === constUser.tempPassword
+    ) {
+      completeQuest("login_mailbox");
+      // DOĞRU GİRİŞ LOGU (wifi logu kaldırıldı)
+      addEventLogOnce(
+        "mailbox_login",         // type
+        "email",                 // uniqueField (her kullanıcı bir kez loglansın)
+        loginEmail.toLowerCase(),
+        {
+          type: "mailbox_login",
+          questId: "mailbox_login",
+          logEventType: "login",
+          value: 0, // Girişten puan
+          data: {
+            email: loginEmail.toLowerCase()
+          }
+        }
+      );
+      setIsMailboxLoggedIn(true);
+      setLoginError('');
+      setLoginPassword('');
+      setLoginEmail('');
+    } else {
+      setLoginError("E-posta adresi veya geçici şifre yanlış!");
+      setTimeout(() => setLoginError(''), 2000);
+    }
+  };
+
+  // ----------------- /GİRİŞ EKRANI -----------------
+
+  // ----------------- GİRİŞ EKRANI UI -----------------
+  if (!isMailboxLoggedIn) {
+    return (
+      <div className="mailbox-window" style={style} ref={mailboxRef} data-window="mailbox">
+        <div className="mailbox-header">
+          <div className='mailbox-header-left'>
+            <img className="menu-icon" src="./icons/menu.png" alt="Menu Icon"/>
+          </div>
+          <button className="mailbox-close" onClick={closeHandler}>×</button>
+        </div>
+        <div className="mailbox-login-screen">
+          <div className="mailbox-login-form" style={{
+            margin: "50px auto", maxWidth: 350, padding: 28, borderRadius: 15, background: "#222c", display: "flex", flexDirection: "column", alignItems: "center"
+          }}>
+            <img src="./icons/mail.png" alt="MailBox Icon" style={{ width: 48, marginBottom: 10 }} />
+            <h2>MailBox Girişi</h2>
+            <form onSubmit={handleLogin} style={{width: "100%", display: "flex", flexDirection: "column", gap: 16, marginTop: 18}}>
+              <input
+                type="email"
+                placeholder="E-posta adresi"
+                value={loginEmail}
+                autoFocus
+                onChange={e => setLoginEmail(e.target.value)}
+                style={{fontSize: 15, padding: 9, borderRadius: 7, border: "1px solid #ccc", background: "#2a2537", color: "#fff"}}
+              />
+              <input
+                type="password"
+                placeholder="Geçici Şifre"
+                value={loginPassword}
+                onChange={e => setLoginPassword(e.target.value)}
+                style={{fontSize: 15, padding: 9, borderRadius: 7, border: "1px solid #ccc", background: "#2a2537", color: "#fff"}}
+              />
+              <button
+                type="submit"
+                style={{
+                  marginTop: 10, background: "#51b0f2", color: "#fff", fontWeight: 600,
+                  border: "none", borderRadius: 7, padding: "9px 0", cursor: "pointer", fontSize: 16
+                }}
+              >Giriş Yap</button>
+            </form>
+            {loginError && <div style={{ color: "#f85", marginTop: 12 }}>{loginError}</div>}
+            <div style={{marginTop:24, fontSize:14, color:"#ccc"}}>
+              <b>İpucu:</b> Kayıt olduğun e-posta ve verilen geçici şifreyi kullanmalısın.
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  // ----------------- /GİRİŞ EKRANI UI -----------------
+
+  // ------------- BURADAN SONRASI ORİJİNAL MAILBOX RENDER'I -------------
   return (
     <div className="mailbox-window" style={style} ref={mailboxRef} data-window="mailbox" >
       <div className="mailbox-header">
@@ -253,6 +377,18 @@ const Mailbox = ({ closeHandler, style }) => {
                                   setInboxMails(prev => prev.filter(mail => mail.id !== selectedMail.id));
                                   setSpamboxMails(prev => [...prev, { ...selectedMail, readMail: true }]);
                                   setSelectedMail(null);
+
+                                  // SPAM'A BİLDİR LOGU (ayarlanmadı)
+                                  // addEventLog({
+                                  //   type: "mark_as_spam",
+                                  //   questId: "mailbox_spam_report", // quest varsa
+                                  //   logEventType: "mark_spam",
+                                  //   value: 2, // spam bildirme puanı
+                                  //   data: {
+                                  //     mailId: selectedMail.id,
+                                  //     title: selectedMail.title,
+                                  //   }
+                                  // });
                                 }
                                 setShowSpamMenu(false);
                               }}

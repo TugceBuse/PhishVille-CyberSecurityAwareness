@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import styles from "./FileLocker.module.css";
 import { useFileContext } from "../../../Contexts/FileContext";
+import { useEventLog } from "../../../Contexts/EventLogContext";
 
 const LOCK_ICON = (
   <img src="/FileLocker/locked.png" alt="Locked File" />
@@ -8,6 +9,9 @@ const LOCK_ICON = (
 
 const FileLocker = ({ onClose }) => {
   const { files, updateFileStatus } = useFileContext();
+  // Değişiklik: addEventLog yerine addEventLogOnce fonksiyonu kullanıyoruz
+  const { addEventLogOnce } = useEventLog();
+
   // Şifrelenmiş dosya isimleri
   const lockedFiles = Object.keys(files).filter(
     name => files[name].locked
@@ -19,18 +23,88 @@ const FileLocker = ({ onClose }) => {
     );
 
   const [selected, setSelected] = useState(null);
+  const [unlockSuccess, setUnlockSuccess] = useState(false);
   const [lockSuccess, setLockSuccess] = useState(false);
+  const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);  // 👁 Şifreyi göster için state
 
+  // Şifre gücü kontrol fonksiyonu
+  function checkPasswordStrength(password) {
+    if (password.length < 8)
+      return "Şifre en az 8 karakter olmalı.";
+    if (!/[A-Z]/.test(password))
+      return "Şifre en az bir büyük harf içermeli.";
+    if (!/[a-z]/.test(password))
+      return "Şifre en az bir küçük harf içermeli.";
+    if (!/[0-9]/.test(password))
+      return "Şifre en az bir rakam içermeli.";
+    if (!/[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?]/.test(password))
+      return "Şifre en az bir özel karakter içermeli.";
+    return null;
+  }
+
+  // Dosyayı şifrele (ilk şifrelemede dosya başına 1 puan)
   const handleLock = () => {
     if (!selected) return;
-    updateFileStatus(selected, { locked: true });
+    const error = checkPasswordStrength(password);
+    if (error) {
+      setPasswordError(error);
+      setTimeout(() => setPasswordError(""), 2000);
+      return;
+    }
+    // Her dosya için sadece 1 kez puan verilecek şekilde logla
+    addEventLogOnce(
+      "locked_file",   // type
+      "file",          // uniqueField
+      selected,        // uniqueValue
+      {
+        type: "locked_file",
+        questId: null,
+        logEventType: "locked_file",
+        value: 1,
+        data: { file: selected }
+      }
+    );
+    updateFileStatus(selected, { locked: true, hash: password });
     setLockSuccess(true);
     setTimeout(() => setLockSuccess(false), 1200);
+    setPassword("");
+    setPasswordError("");
+    setShowPassword(false); // Şifre gösterimi otomatik kapanır
   };
 
+  // Kilidi aç (loglanır ama puan vermez)
   const handleUnlock = () => {
     if (!selected) return;
-    updateFileStatus(selected, { locked: false });
+    if (!password) {
+      setPasswordError("Lütfen şifrenizi girin.");
+      setTimeout(() => setPasswordError(""), 2000);
+      return;
+    }
+    if (files[selected].hash !== password) {
+      setPasswordError("Şifre yanlış!");
+      setTimeout(() => setPasswordError(""), 2000);
+      return;
+    }
+    updateFileStatus(selected, { locked: false, hash: "" });
+    addEventLogOnce(
+      "unlocked_file",
+      "file",
+      selected,
+      {
+        type: "unlocked_file",
+        questId: null,
+        logEventType: "unlocked_file",
+        value: 0,
+        data: { file: selected }
+      }
+    );
+    setUnlockSuccess(true);
+    setTimeout(() => setUnlockSuccess(false), 1200);
+    setPassword("");
+    setPasswordError("");
+    setShowPassword(false); // Şifre gösterimi otomatik kapanır
   };
 
   return (
@@ -55,7 +129,12 @@ const FileLocker = ({ onClose }) => {
               <div
                 key={fileName}
                 className={`${styles.fileItem} ${file.locked ? styles.locked : ""} ${selected === fileName ? styles.selected : ""}`}
-                onClick={() => setSelected(fileName)}
+                onClick={() => {
+                  setSelected(fileName);
+                  setPassword("");
+                  setPasswordError("");
+                  setShowPassword(false);
+                }}
                 tabIndex={file.locked ? -1 : 0}
                 aria-disabled={file.locked}
                 title={file.locked ? "Bu dosya zaten şifreli" : "Şifrelemek için seç"}
@@ -69,24 +148,51 @@ const FileLocker = ({ onClose }) => {
           </div>
         )}
       </div>
-      <div className={styles.actions}>
-        <button
-            className={styles.lockBtn}
-            onClick={handleLock}
-            disabled={!selected || (selected && files[selected].locked)}
-        >
-            {selected && files[selected].locked ? "Zaten Şifreli" : "Dosyayı Şifrele"}
-        </button>
-        {/* KİLİDİ AÇ butonu */}
-        {selected && files[selected].locked && (
-            <button className={styles.lockBtn} onClick={handleUnlock}>
-            Kilidi Aç
-            </button>
-        )}
-        {lockSuccess && (
-            <span className={styles.successMsg}>Dosya şifrelendi!</span>
-        )}
+      {lockSuccess && <span className={styles.successMsg}>Dosya şifrelendi!</span>}
+      {unlockSuccess && <span className={styles.successMsg}>Kilit açıldı!</span>}
+      {/* Şifre inputu sadece dosya seçilirse çıkar */}
+      {selected && (
+        <div className={styles.passwordArea}>
+          <div className={styles.passwordInputRow}>
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder={files[selected].locked ? "Kilidi açmak için şifre girin" : "Dosyayı kilitlemek için şifre girin"}
+              value={password}
+              onChange={e => {
+                setPassword(e.target.value);
+                setPasswordError("");
+              }}
+              autoFocus
+            />
+            {/* Şifreyi Göster Toggle */}
+            <label className={styles.showPasswordLabel}>
+              <input
+                type="checkbox"
+                checked={showPassword}
+                onChange={() => setShowPassword(v => !v)}
+              />
+              <span className={styles.showPasswordText}>Şifreyi Göster</span>
+            </label>
+          </div>
+          {passwordError && <span className={styles.errorMsg}>{passwordError}</span>}
         </div>
+      )}
+      <div className={styles.actions}>
+        {/* Şifrele */}
+        <button
+          className={styles.lockBtn}
+          onClick={handleLock}
+          disabled={!selected || (selected && files[selected].locked)}
+        >
+          {selected && files[selected].locked ? "Zaten Şifreli" : "Dosyayı Şifrele"}
+        </button>
+        {/* Kilidi aç */}
+        {selected && files[selected].locked && (
+          <button className={styles.lockBtn} onClick={handleUnlock}>
+            Kilidi Aç
+          </button>
+        )}
+      </div>
       <div className={styles.footer}>
         <span>
           🔒 Şifrelenen dosyalar koruma altına alınır ve içeriklerine erişilemez.

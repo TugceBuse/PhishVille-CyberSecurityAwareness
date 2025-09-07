@@ -9,10 +9,20 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
+function isValidUsername(username) {
+  return /^[a-zA-Z0-9_]+$/.test(username) && username.length >= 3 && username.length <= 15;
+}
+
 // Kullanıcı kaydı
 exports.registerUser = async (req, res) => {
   try {
     const { firstName, lastName, username, password, email } = req.body;
+
+    if (!isValidUsername(username)) {
+      return res.status(400).json({
+        error: 'Kullanıcı adı yalnızca İngilizce harf, rakam ve alt çizgi (_) içermeli ve 3-15 karakter arasında olmalı.',
+      });
+    }
 
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {

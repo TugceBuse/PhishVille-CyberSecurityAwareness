@@ -142,7 +142,6 @@ const ProfilePage = () => {
             <p><strong>Soyad </strong>: {user.lastName}</p>
             <p><strong>Kullanıcı Adı </strong>: {user.username}</p>
             <p><strong>E-posta </strong>: {user.email}</p>
-            <p><strong>Toplam Skor </strong>: {user.score}</p>
             <p> <strong>Şifre </strong>: ********</p>
             <p><strong>Üyelik Tarihi</strong>: {new Date(user.createdAt).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
             <button className="edit-button" onClick={handleEditToggle}>

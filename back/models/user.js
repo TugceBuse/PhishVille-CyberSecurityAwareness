@@ -125,7 +125,6 @@ UserSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     return next();
   }
-
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
@@ -143,6 +142,18 @@ UserSchema.methods.comparePassword = async function (candidatePassword) {
     throw err;
   }
 };
+
+// GAME SESSION VIRTUAL ALANI EKLENDİ
+UserSchema.virtual('gameSessions', {
+  ref: 'GameSession',           // Model adı
+  localField: '_id',            // User tablosundaki alan
+  foreignField: 'userId',       // GameSession'daki referans
+  justOne: false
+});
+
+// Virtualların JSON çıktılarda görünmesi için:
+UserSchema.set('toObject', { virtuals: true });
+UserSchema.set('toJSON', { virtuals: true });
 
 const User = mongoose.model('User', UserSchema);
 

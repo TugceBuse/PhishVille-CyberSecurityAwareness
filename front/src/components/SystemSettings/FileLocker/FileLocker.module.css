@@ -178,3 +178,106 @@
   font-size: 0.97rem;
   opacity: 0.95;
 }
+
+.passwordInputRow {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-left: 10px;
+  width: 100%;
+}
+
+.passwordArea {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 18px 0 10px 0;
+  gap: 7px;
+  width: 100%;
+}
+
+.passwordArea input[type="password"],
+.passwordArea input[type="text"] {
+  width: 70%;
+  padding: 11px 16px;
+  border-radius: 9px;
+  border: 1.8px solid #3646b8;
+  background: #212c45;
+  color: #eef6ff;
+  font-size: 1.08rem;
+  transition: border 0.2s, box-shadow 0.2s;
+  outline: none;
+  box-shadow: 0 2px 14px #2224 0.10;
+  letter-spacing: 0.08em;
+  align-self: end;
+  margin-right: 0;
+}
+
+.passwordArea input[type="password"]:focus {
+  border: 2px solid #30b9d6;
+  background: #222d4d;
+  box-shadow: 0 0 0 2px #30b9d677;
+}
+
+/* Göz ikonu/kutu için label */
+.showPasswordLabel {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  font-size: 1.02rem;
+  color: #cee397;
+  margin-left: 7px;
+  user-select: none;
+}
+.showPasswordLabel input[type="checkbox"] {
+  accent-color: #bedb39;
+  width: 18px;
+  height: 18px;
+  margin: 0 2px 0 0;
+  cursor: pointer;
+}
+.showPasswordText {
+  font-size: 0.99em;
+  color: #dfe7d2;
+}
+
+.showPasswordIcon {
+  font-size: 1.13em;
+  margin-left: 1px;
+  color: #bedb39;
+  vertical-align: middle;
+  opacity: 0.85;
+}
+
+.errorMsg {
+  color: #fd5961;
+  font-size: 0.96rem;
+  margin-top: 1px;
+  padding-left: 3px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  align-self: end;
+  margin-right: 27px;
+}
+
+.successMsg {
+  color: #41de80;
+  background: #243c29;
+  font-size: 1.03rem;
+  border-radius: 7px;
+  padding: 5px 15px;
+  margin-left: 10px;
+  margin-top: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  box-shadow: 0 1px 9px #3fb78633;
+  animation: locker-pop 0.6s;
+  align-self: end;
+}
+
+@keyframes locker-pop {
+  0% { transform: scale(0.96); opacity: 0.2;}
+  60% { transform: scale(1.05);}
+  100% { transform: scale(1); opacity: 1;}
+}

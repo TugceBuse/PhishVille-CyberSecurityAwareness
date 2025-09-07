@@ -1,0 +1,34 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.attachmentBox {
+  display: flex;
+  align-items: center;
+  background: #1f1f1f;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  margin: 4px 0;
+  gap: 8px;
+  position: relative;
+}
+
+.downloadIcon {
+  font-size: 1.2rem;
+}
+
+.linkText {
+  color: #6ec3ff;
+  text-decoration: underline;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s;
+  text-align: center;
+}
+.linkText:hover {
+  color: #42b0fa;
+}

@@ -2,10 +2,12 @@ import React, { useState, useRef } from "react";
 import styles from "./QuickPDFView.module.css";
 import { useWindowConfig } from "../../Contexts/WindowConfigContext";
 import { useQuestManager } from "../../Contexts/QuestManager";
+import { useEventLog } from "../../Contexts/EventLogContext";
 
 const QuickPDFViewSite = () => {
   const { completeQuest } = useQuestManager();
   const { updateAvailableStatus } = useWindowConfig();
+  const { addEventLog } = useEventLog();
   const [progress, setProgress] = useState(0);
   const [downloading, setDownloading] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
@@ -22,6 +24,16 @@ const QuickPDFViewSite = () => {
         setShowPopup(true);
         updateAvailableStatus("quickpdfviewer", true);
         completeQuest("pdf_viewer_install");
+        addEventLog({
+          type: "download",
+          questId: "pdf_viewer_install",
+          logEventType: "pdf_viewer_download",
+          value: -5,
+          data: {
+            site: "QuickPDFView",
+            isFake: true,
+          }
+        });
         setTimeout(() => setShowPopup(false), 3000);
         setDownloading(false);
         return 100;

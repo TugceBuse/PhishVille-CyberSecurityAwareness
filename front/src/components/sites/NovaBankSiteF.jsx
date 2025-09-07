@@ -1,9 +1,12 @@
 import React, { useState, useRef } from "react";
 import styles from './NovaBankSiteF.module.css';
 import { useFileContext } from "../../Contexts/FileContext";
+import { useEventLog } from "../../Contexts/EventLogContext";
 
 const NovaBankSiteF = () => {
   const { setFiles } = useFileContext();
+  const { addEventLog } = useEventLog();
+
   const [progress, setProgress] = useState(0);
   const [downloading, setDownloading] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
@@ -37,6 +40,17 @@ const NovaBankSiteF = () => {
               exeType: "novabankappsetupf"
             }
           }));
+          addEventLog({
+            type: "download_setup",
+            questId: "download_novabank",
+            logEventType: "download",
+            value: -10,
+            data: 
+            {
+              file: "novabankappsetup",
+              isFake: true,
+            }
+          });
 
           setTimeout(() => setShowPopup(false), 4000);
           return 100;

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useFileContext } from "../../Contexts/FileContext";
 import { useQuestManager } from "../../Contexts/QuestManager"; // EKLENDİ
 import styles from "./FileVault.module.css";
+import { useEventLog } from "../../Contexts/EventLogContext";
 
 // Token kontrolü
 const VALID_TOKEN = "a92cf10a-27d4-476b-98f3-8d2fa98c7d84";
@@ -46,6 +47,7 @@ importantFiles.forEach(f => {
 
 const FileVault = () => {
   const { files, updateFileStatus } = useFileContext(); // files eklendi
+  const { addEventLog } = useEventLog();
   const { completeQuest, quests } = useQuestManager();
   const [entered, setEntered] = useState(false);
   const [input, setInput] = useState("");
@@ -60,6 +62,21 @@ const FileVault = () => {
   const downloadCloudQuest = quests.find(q => q.id === "download_cloud");
   if (allDownloaded && downloadCloudQuest?.status !== "completed") {
     completeQuest("download_cloud");
+    addEventLog({
+      type: "download_files",
+      questId: "download_cloud",
+      logEventType: "download",
+      value: 10, 
+      data: 
+      {
+        site: "FileVault",
+        files: importantFiles.map(f => ({
+          name: f.name,
+          key: f.key,
+          size: f.size
+        }))
+      }
+    });
   }
 }, [files, completeQuest, importantFiles, quests]);
   // --- SONU ---

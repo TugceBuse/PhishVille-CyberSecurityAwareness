@@ -1,7 +1,10 @@
 import React, { useState, useRef } from "react";
 import styles from './ChatAppDownloadPhish.module.css';
-import { useVirusContext } from '../../Contexts/VirusContext';
 import { useQuestManager } from "../../Contexts/QuestManager";
+import { useEventLog } from "../../Contexts/EventLogContext";
+import { useFileContext } from "../../Contexts/FileContext";
+import { useVirusContext } from "../../Contexts/VirusContext";
+import { showFakeCMD } from '../../utils/fakeCMD';
 
 // Sahte öne çıkarılan özellikler
 const highlights = [
@@ -35,16 +38,26 @@ const fakeClients = [
 ];
 
 const ChatAppF = () => {
+  const { addFile, updateFileStatus } = useFileContext();
   const { addVirus } = useVirusContext();
+
+  const { addEventLog, addEventLogOnce } = useEventLog();
   const [downloading, setDownloading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
   const intervalRef = useRef(null);
-  const failQuest = useQuestManager();
+  const {failQuest} = useQuestManager();
+
+  const [alreadyDownloaded, setAlreadyDownloaded] = useState(false);
 
   const [cancelled, setCancelled] = useState(false);
 
   const startDownload = () => {
+    if (alreadyDownloaded) {
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 2500);
+      return;
+    }
     setCancelled(false);
     setDownloading(true);
     setProgress(0);
@@ -53,16 +66,95 @@ const ChatAppF = () => {
       setProgress(prev => {
         if (prev >= 100) {
           clearInterval(intervalRef.current);
+          setAlreadyDownloaded(true);
           setShowPopup(true);
+          addFile("chatboxzip", {
+          label: "ChatBox.zip",
+          icon: "/icons/zip-file.png",
+          location: "desktop",
+          type: "zip",
+          clickable: true,
+          onOpen: () => {
+            addFile("chatboxsetup", {
+              label: "ChatBox_Setup.exe",
+              icon: "/icons/chatting.png",
+              location: "desktop",
+              type: "exe",
+              clickable: true,
+              infected: true,
+              detectable: true,
+              virusType: "credential-stealer",
+              onOpen: () => {
+                // virüs bulaştır
+                addVirus({
+                  type: "credential-stealer",
+                  detectable: true,
+                  sourcefile: "chatboxsetup",
+                  impact: "credential-theft",
+                  severity: "medium",
+                });
 
+                addEventLogOnce(
+                  "open_file",                     // type
+                  "file",                          // uniqueField (data içindeki unique alan)
+                  "chatboxsetup",                  // uniqueValue (data içindeki unique alanın değeri)
+                  {
+                    type: "open_file",
+                    questId: "download_chatapp",
+                    logEventType: "open_file",
+                    value: -10,
+                    data: {
+                      file: "chatboxsetup",
+                      virusType: "credential-stealer"
+                    }
+                  }
+                );
+
+                showFakeCMD({
+                  title: "CMD - ChatBox.exe çalıştırılıyor...",
+                  lines: [
+                    "Yürütülüyor: chatbox_stealer.exe",
+                    "Kullanıcı bilgileri toplanıyor...",
+                    "Veriler leakhost.com adresine gönderildi!",
+                    "Bağlantı kapatıldı."
+                  ],
+                  duration: 1000
+                });
+              }
+            });
+
+            updateFileStatus("chatboxzip", { label: "ChatBox.zip (Ayıklandı)", clickable: false });
+
+            addEventLog({
+              type: "unzip_file",
+              questId: "download_chatapp",
+              logEventType: "unzip",
+              value: -5,
+              data: {
+                archive: "chatboxzip",
+                extracted: ["chatboxsetup"]
+              }
+            });
+          }
+        });
           // 2sn sonra popup kapanacak VE sadece iptal edilmediyse virüs eklenecek
           setTimeout(() => {
             setShowPopup(false);
             setDownloading(false);
 
             if (!cancelled) {
-              addVirus({ type: "credential-stealer", source: "chatappf.exe" });
               failQuest("download_chatapp");
+              addEventLog({
+                type: "download_setup",
+                questId: "download_chatapp",
+                logEventType: "download",
+                value: -10,
+                data: 
+                {
+                  site: "ChatAppDownloadPhish",
+                  isFake: true,
+                }
+              });
             }
           }, 2000);
 
@@ -121,7 +213,7 @@ const ChatAppF = () => {
             }
             {showPopup && (
               <div className={styles.popup}>
-                Kurulum dosyası indirildi! <b>Hemen kuruluma başlayın.</b>
+                {alreadyDownloaded ? "Bu uygulama zaten indirildi." : "Uygulama başarıyla indirildi!"}
               </div>
             )}
             <div className={styles.legalText}>Kurulum ile tüm sözleşme ve veri politikalarını kabul etmiş sayılırsınız.</div>

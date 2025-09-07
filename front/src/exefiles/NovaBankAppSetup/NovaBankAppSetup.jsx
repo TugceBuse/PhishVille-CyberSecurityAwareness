@@ -4,11 +4,13 @@ import { useUIContext } from '../../Contexts/UIContext';
 import { useFileContext } from '../../Contexts/FileContext';
 import { useWindowConfig } from '../../Contexts/WindowConfigContext';
 import { useQuestManager } from '../../Contexts/QuestManager';
+import { useEventLog } from '../../Contexts/EventLogContext'; // Log ekleme fonksiyonu
 
 const NovaBankAppSetup = ({ fileName, onInstallComplete, onAntivirusCheck }) => {
-  const { closeFile } = useFileContext();
+  const { closeFile, files } = useFileContext();
   const { updateAvailableStatus, windowConfig } = useWindowConfig();
   const { completeQuest } = useQuestManager();
+  const { addEventLog } = useEventLog();
   const SetupRef = useRef(null);
 
   const [step, setStep] = useState(1);
@@ -66,6 +68,21 @@ const NovaBankAppSetup = ({ fileName, onInstallComplete, onAntivirusCheck }) => 
           setInstalling(false);
           setStep(4);
           updateAvailableStatus('novabankapp', true);
+
+          const fileMeta = files?.[fileName];
+          const isFake = fileMeta?.infected === true || fileMeta?.virusType === "adware";
+          addEventLog({
+            type: "setup_novabank",
+            questId: "download_novabank",
+            logEventType: "setup",
+            value: isFake ? -10 : 10,
+            data: 
+            {
+              file: fileName,
+              infected: fileMeta?.infected,
+              virusType: fileMeta?.virusType || null,
+            }
+          });
           completeQuest('download_novabank'); // Görev tamamlandı
           return 100;
         }

@@ -6,8 +6,10 @@ import { useMailContext } from '../Contexts/MailContext';
 import { useChatContext } from '../Contexts/ChatContext';
 import { useTimeContext } from '../Contexts/TimeContext';
 import { useQuestManager } from '../Contexts/QuestManager';
+import { useEventLog } from '../Contexts/EventLogContext';
 
 const DownloadButton = ({ label, fileName, fileContent, fileLabel, mailId }) => {
+  const { addEventLog } = useEventLog();
   const { addFile, updateFileStatus, files, openFile } = useFileContext();
   const { isWificonnected } = useGameContext();
   const { selectedMail } = useMailContext();
@@ -23,11 +25,14 @@ const DownloadButton = ({ label, fileName, fileContent, fileLabel, mailId }) => 
 
   const downloadMailIdRef = useRef(null);
 
-  // Yeni: Sadece bu maile ait butonda etkileşim
+  // Dosya daha önce indirildiyse
+  const isDownloaded = !!files[fileName]?.available;
+
+  // Sadece bu maile ait butonda etkileşim
   const isActive = !mailId || (selectedMail?.id === mailId);
 
   const handleDownload = () => {
-    if (!isWificonnected || !isActive) return;
+    if (!isWificonnected || !isActive || isDownloaded) return;
     setDownloading(true);
     setCancelled(false);
     setProgress(0);
@@ -66,18 +71,14 @@ const DownloadButton = ({ label, fileName, fileContent, fileLabel, mailId }) => 
 
   useEffect(() => {
     if (progress >= 100 && downloading && !cancelled && isActive) {
-
-       // ÖZEL DURUM: sahtefatura dosyasıysa, virüslü olarak ekle
+      // Dosya indirme tamamlandıysa
       if (fileName === "sahtefatura") {
         updateFileStatus("sahtefatura", {
           available: true,
-          infected: true,
-          virusType: "ransomwareHash",
         });
         failQuest("save_invoice");
       }
 
-      // Dinamik dosya ekle!
       if (!files[fileName]) {
         addFile(fileName, {
           available: true,
@@ -98,7 +99,6 @@ const DownloadButton = ({ label, fileName, fileContent, fileLabel, mailId }) => 
         updateFileStatus(fileName, { available: true });
       }
 
-      // Eğer Fatura PDF’si indirildiyse
       if ((fileName?.toLowerCase()?.includes('fatura') || fileLabel?.toLowerCase()?.includes('fatura'))) {
         addUploadTask({
           userId: 3,
@@ -119,37 +119,79 @@ const DownloadButton = ({ label, fileName, fileContent, fileLabel, mailId }) => 
 
       setDownloading(false);
       setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 2500);
 
-      // İstersen dosyayı otomatik açabilirsin:
-      // openFile(fileName, "doculite");
+      if( fileName === "sahtefatura" ) {
+        addEventLog({
+          type: "download_phishing_mail",
+          questId: "save_invoice",
+          value: -10,
+          data: 
+          {
+            mailId: mailId,
+            file: fileName
+          },
+        });
+      } 
+      else if (fileName?.toLowerCase()?.includes('fatura')){
+        addEventLog({
+          type: "download_mail",
+          questId: "save_invoice",
+          value: 10,
+          data: {
+            mailId: mailId,
+            file: fileName
+          },
+        });
+      }
+      else if (fileName === "taskappsetup") {
+        addEventLog({
+          type: "download_mail",
+          questId: "download_taskapp",
+          value: 10,
+          data: {
+            mailId: mailId,
+            file: fileName
+          },
+        });
+      }
+      else if (fileName === "taskappsetupf") {
+        addEventLog({
+          type: "download_phishing_mail",
+          questId: "download_taskapp",
+          value: -10,
+          data: {
+            mailId: mailId,
+            file: fileName
+          },
+        });
+      }
+      else if (fileName === "rapor_2025") {
+        addEventLog({
+          type: "download_phishing_mail",
+          questId: null,
+          value: -5,
+          data: {
+            mailId: mailId,
+            file: fileName
+          },
+        });
+      }
+      setTimeout(() => setShowSuccess(false), 2500);
     }
   }, [progress, downloading, cancelled, isActive, fileName, fileContent, addFile, updateFileStatus, files, fileLabel]);
 
+  // Mail değişince popup otomatik açıksa kapat (örneğin kullanıcı başka maile geçti, eski popup’ı gizle)
+  useEffect(() => {
+    setShowSuccess(false);
+    setShowCancelled(false);
+    setDownloading(false);
+    setProgress(0);
+    setCancelled(false);
+  }, [selectedMail?.id, mailId, fileName]);
+
   return (
     <div className={styles.container}>
-      {!downloading ? (
-        <div className={`${styles.attachmentBox} ${styles.wrapperWithBubble}`}>
-          {showSuccess && <div className={styles.successBubble}>✔ İndirildi</div>}
-          {showCancelled && <div className={styles.cancelBubble}>❌ İptal Edildi</div>}
-          <span className={styles.downloadIcon}>📎</span>
-          <span>{label}</span>
-          <button
-            className={styles.downloadAction}
-            onClick={handleDownload}
-            disabled={!isWificonnected || !isActive}
-            title={
-              !isWificonnected
-                ? 'Wi-Fi bağlantısı yok'
-                : !isActive
-                ? 'Yanlış mail'
-                : ''
-            }
-          >
-            İndir
-          </button>
-        </div>
-      ) : (
+      {downloading ? (
         <div className={styles.progressWrapper}>
           <div className={styles.progressBar}>
             <div
@@ -159,6 +201,30 @@ const DownloadButton = ({ label, fileName, fileContent, fileLabel, mailId }) => 
             <span className={styles.progressLabel}>{label}</span>
           </div>
           <button className={styles.cancel} onClick={cancelDownload}>✕</button>
+        </div>
+      ) : (
+        <div className={`${styles.attachmentBox} ${styles.wrapperWithBubble}`}>
+          {showSuccess && <div className={styles.successBubble}>✔ İndirildi</div>}
+          {showCancelled && <div className={styles.cancelBubble}>❌ İptal Edildi</div>}
+          <span className={styles.downloadIcon}>📎</span>
+          <span>{label}</span>
+          <button
+            className={styles.downloadAction}
+            onClick={handleDownload}
+            disabled={!isWificonnected || !isActive || isDownloaded}
+            style={isDownloaded ? { opacity: 0.4, cursor: "not-allowed" } : {}}
+            title={
+              !isWificonnected
+                ? 'Wi-Fi bağlantısı yok'
+                : !isActive
+                ? 'Yanlış mail'
+                : isDownloaded
+                ? 'Bu dosya zaten indirildi'
+                : ''
+            }
+          >
+            İndir
+          </button>
         </div>
       )}
     </div>
