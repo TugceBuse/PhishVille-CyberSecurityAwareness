@@ -290,6 +290,7 @@ const Postify = () => {
 
     setNewPostContent('');
     setNewPostImage('');
+    setSelectedImageTemp('');
 
     // PostifyInfo.userPosts yoksa boş dizi olarak başlat!
     setPostifyInfo({
