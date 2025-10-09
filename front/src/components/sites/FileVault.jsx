@@ -36,6 +36,13 @@ const importantFiles = [
     type: "pdf",
     size: "2.1 MB",
     description: "Şirket içi yönergeler ve kurallar"
+  },
+  {
+    key: "farkindalik_afisi",
+    name: "Farkındalık-Afişi.jpg",
+    type: "jpg",
+    size: "712 KB",
+    description: "Bilgi Güvenliği Farkındalığı Afişi"
   }
 ];
 

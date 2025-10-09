@@ -233,6 +233,34 @@ const defaultFileSchema = {
             content: "/files/Personel_El_Kitabı.txt",
             locked: false,
             hash: " ",
+        },
+        farkindalik_afisi: {
+            available: false,
+            quarantined: false,
+            clickable: true,
+            infected: false,
+            type: "jpg",
+            size: "712KB",
+            location: "downloads",
+            label: "Farkindalik-Afisi.jpg",
+            icon: "/icons/image.png",
+            content: "/files/farkindalik_afisi.jpg",
+            hash: " ",
+            locked: false
+        },
+        aa: {
+            available: true,
+            quarantined: false,
+            clickable: true,
+            infected: false,
+            type: "png",
+            size: "712KB",
+            location: "downloads",
+            label: "image.png",
+            icon: "/icons/image.png",
+            content: "/icons/image.png",
+            hash: " ",
+            locked: false
         }
     });
 

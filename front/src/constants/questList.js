@@ -296,23 +296,23 @@ const QUEST_LIST = [
   },
 
   // Örnek (ileride açmak istersen):
-  // {
-  //   id: "sharing_post",
-  //   title: "Sosyal Medya Üzerinden Paylaşım Yap",
-  //   description:  `Şirketin sosyal ağı olan Postify üzerinde yarın yapılacak olan şirket etkinliği için bir paylaşım yap.`,
-  //   status: "locked",
-  //   unlocks: null,
-  //   unlocksOnSuccess: [],
-  //   requires: ["register_career_site", "download_chatapp"],
-  //   requiresAll: ["register_career_site", "download_chatapp"],
-  //   requiresAny: [],
-  //   visibility: "auto",
-  //   acceptsEarlyCompletion: true,
-  //   optional: true,
-  //   point: 20,
-  //   penalty: -20,
-  //   logEventType: "postify"
-  // },
+  {
+    id: "sharing_post",
+    title: "Sosyal Medya Üzerinden Paylaşım Yap",
+    description:  `Şirketin sosyal ağı olan Postify üzerinde bilgi güvenliği farkındalığı için bir paylaşım yap.`,
+    status: "locked",
+    unlocks: null,
+    unlocksOnSuccess: [],
+    requires: ["register_career_site", "download_chatapp"],
+    requiresAll: ["register_career_site", "download_chatapp"],
+    requiresAny: [],
+    visibility: "auto",
+    acceptsEarlyCompletion: true,
+    optional: true,
+    point: 20,
+    penalty: -20,
+    logEventType: "postify"
+  },
 ];
 
 export { QUEST_LIST };
