@@ -1,6 +1,7 @@
+const mongoose = require('mongoose');
 const GameSession = require('../models/gameSession');
 
-// Yardımcılar
+// Helpers
 const VALID_STATUSES = new Set([
   'locked',
   'active',
@@ -10,7 +11,7 @@ const VALID_STATUSES = new Set([
   'skipped'
 ]);
 
-// Hafif normalize + güvenli tip dönüşümleri
+// Light normalize + safe type conversions
 function normalizeQuest(q) {
   if (!q) return null;
   const quest = {
@@ -20,21 +21,21 @@ function normalizeQuest(q) {
     score: Number.isFinite(q.score) ? Number(q.score) : 0,
     logEventType: q.logEventType ? String(q.logEventType) : undefined,
 
-    // oyun içi ms
+    // in-game ms
     completedAtMs: Number.isFinite(q.completedAtMs) ? Number(q.completedAtMs) : undefined,
     // erken tamamlama
     earlyCompleted: !!q.earlyCompleted,
 
-    // gerçek dünya zamanı
+    // real world time
     completedAt: q.completedAt ? new Date(q.completedAt) : undefined
   };
 
-  // Status enum kontrolü (uyumsuzsa locked’a düşür)
+  // Status enum check (fallback to locked if invalid)
   if (!VALID_STATUSES.has(quest.status)) {
     quest.status = 'locked';
   }
 
-  // Zorunlu alan kontrolü (questId/title yoksa null dön)
+  // Required fields check (return null if questId/title missing)
   if (!quest.questId || !quest.title) return null;
 
   return quest;
@@ -49,10 +50,10 @@ function normalizeEventLog(ev) {
     value: Number.isFinite(ev.value) ? Number(ev.value) : 0,
     data: ev.data,
 
-    // oyun içi ms
+    // in-game ms
     gameMs: Number.isFinite(ev.gameMs) ? Number(ev.gameMs) : undefined,
 
-    // gerçek dünya zamanı
+    // real world time
     timestamp: ev.timestamp ? new Date(ev.timestamp) : undefined
   };
 
@@ -60,7 +61,7 @@ function normalizeEventLog(ev) {
   return log;
 }
 
-// Oyun oturumu oluştur (mevcut fonksiyon) — GÜNCELLENDİ
+// Create game session
 exports.createGameSession = async (req, res) => {
   try {
     const { quests, eventLogs, totalScore, gameVersion, deviceInfo, startedAt } = req.body;
@@ -80,10 +81,10 @@ exports.createGameSession = async (req, res) => {
       .filter(Boolean);
 
     if (normQuests.length === 0) {
-      return res.status(400).json({ error: "Quests boş olamaz." });
+      return res.status(400).json({ error: "Quests cannot be empty." });
     }
 
-    // totalScore: gönderilmediyse quests.score toplamı
+    // totalScore: if not provided, sum quests.score
     const computedTotal = normQuests.reduce((acc, q) => acc + (Number(q.score) || 0), 0);
     const finalTotalScore = Number.isFinite(totalScore) ? Number(totalScore) : computedTotal;
 
@@ -103,18 +104,22 @@ exports.createGameSession = async (req, res) => {
 
     await session.save();
 
-    res.status(201).json({ message: "GameSession başarıyla kaydedildi.", session });
+    res.status(201).json({ message: "GameSession saved successfully.", session });
   } catch (err) {
-    console.error("GameSession kayıt hatası:", err);
+    console.error("GameSession save error:", err);
     res.status(500).json({ error: "GameSession kaydedilemedi." });
   }
 };
 
-// Kullanıcının tüm oyun oturumlarını getirir — GÜNCELLENDİ (opsiyonel sayfalama)
+// Get all sessions of current user (optional pagination)
 exports.getUserGameSessions = async (req, res) => {
   try {
-    const page = Number(req.query.page || 1);
-    const limit = Number(req.query.limit || 20);
+    const rawPage = Number(req.query.page || 1);
+    const rawLimit = Number(req.query.limit || 20);
+    const page = Number.isFinite(rawPage) && rawPage > 0 ? Math.floor(rawPage) : 1;
+    const limit = Number.isFinite(rawLimit) && rawLimit > 0
+      ? Math.min(Math.floor(rawLimit), 100)
+      : 20;
     const skip = (page - 1) * limit;
 
     const [sessions, total] = await Promise.all([
@@ -132,22 +137,26 @@ exports.getUserGameSessions = async (req, res) => {
       sessions
     });
   } catch (err) {
-    console.error("GameSession getUserGameSessions hatası:", err);
-    res.status(500).json({ error: "Oyun oturumları getirilemedi." });
+    console.error("GameSession getUserGameSessions error:", err);
+    res.status(500).json({ error: "Game sessions could not be fetched." });
   }
 };
 
-// Belirli bir oturumu id'ye göre getirir (mevcut mantık)
+// Get single session by id
 exports.getGameSessionById = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: "Invalid game session ID." });
+    }
+
     const session = await GameSession.findOne({
       _id: req.params.id,
       userId: req.user.id
     });
-    if (!session) return res.status(404).json({ error: "Oyun oturumu bulunamadı." });
+    if (!session) return res.status(404).json({ error: "Game session not found." });
     res.json(session);
   } catch (err) {
-    console.error("GameSession getGameSessionById hatası:", err);
-    res.status(500).json({ error: "Oyun oturumu getirilemedi." });
+    console.error("GameSession getGameSessionById error:", err);
+    res.status(500).json({ error: "Game session could not be fetched." });
   }
 };
