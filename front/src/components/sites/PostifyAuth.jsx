@@ -3,20 +3,29 @@ import Postify from './Postify';
 import styles from './PostifyAuth.module.css';
 import { useGameContext } from "../../Contexts/GameContext";
 import { usePhoneContext } from "../../Contexts/PhoneContext";
+import { useMailContext } from "../../Contexts/MailContext";
+import { createResetPasswordMail } from "../Mailbox/Mails"; 
+import { useTimeContext } from "../../Contexts/TimeContext";
 
 const PostifyAuth = () => {
   const { PostifyInfo, setPostifyInfo } = useGameContext();
   const { generateCodeMessage, lastCodes, clearCode } = usePhoneContext();
+  const { sendMail } = useMailContext(); 
+  const { secondsRef } = useTimeContext();
 
   const [isLogin, setIsLogin] = useState(true);
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [password, setPassword] = useState("");
+
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
   const [twoFACodeInput, setTwoFACodeInput] = useState("");
   const [is2FAwaiting, setIs2FAwaiting] = useState(false);
   const [codeTimer, setCodeTimer] = useState(120);
   const [lockMessage, setLockMessage] = useState("");
+  const [page, setPage] = useState("login");
 
   const email = PostifyInfo.email;
   const passwordStrong = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&._-]).{8,}$/.test(password);
@@ -111,6 +120,7 @@ const PostifyAuth = () => {
         lockoutUntil: null
       });
       setErrorMessage("");
+      setIsLogin(true);
     } else {
       if (!PostifyInfo.isRegistered || PostifyInfo.email !== email) {
         showTemporaryError("Bu e-posta ile kayıtlı bir hesap bulunmamaktadır.");
@@ -163,6 +173,46 @@ const PostifyAuth = () => {
     setErrorMessage("");
   };
 
+   const handlePasswordReset = () => {
+       if (!PostifyInfo.isRegistered || PostifyInfo.email !== email) {
+        setPage("login");
+        setErrorMessage("Bu e-posta ile kayıtlı bir hesap bulunmamaktadır.");
+        setTimeout(() => setErrorMessage(""), 2000);
+        return;
+      }
+  
+      if (!email || !email.includes("@")) {
+        setErrorMessage("Lütfen geçerli bir e-posta adresi girin.");
+        setTimeout(() => setErrorMessage(""), 2000);
+        return;
+      }
+  
+      const expireAt = (secondsRef?.current || 0) + 60; // 10 dk = 600 sn
+  
+      // Mail gönder
+      sendMail("resetPassword", {
+        from: "postify@support.com",
+        title: "Şifre Sıfırlama Talebi",
+        precontent: "Şifrenizi sıfırlamak için bu e-postayı inceleyin.",
+        content: createResetPasswordMail({
+          email,
+          site: "postify",
+          siteDisplayName: "Postify",
+          from: { id: 1013 },
+          expireAt,
+        })
+      });
+  
+      setSuccessMessage("Şifre sıfırlama bağlantısı e-posta kutunuza gönderildi.");
+      // 2 saniye sonra otomatik temizle
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 2000);
+      
+      setPage("login");
+      
+    };
+
   if (PostifyInfo.isLoggedIn) return <Postify />;
 
   return (
@@ -186,7 +236,7 @@ const PostifyAuth = () => {
       </div>
 
       <div className={styles.authRight}>
-        {!PostifyInfo.isLoggedIn && !is2FAwaiting && (
+        {!PostifyInfo.isLoggedIn && !is2FAwaiting && page !== "forgot" && (
           <div className={styles.authBox}>
             <h2>{isLogin ? "Giriş Yap" : "Kayıt Ol"}</h2>
             {!isLogin && <input type="text" placeholder="Ad" value={name} onChange={(e) => setName(e.target.value)} />}
@@ -195,15 +245,38 @@ const PostifyAuth = () => {
             <input type="password" placeholder="Şifreniz" value={password} onChange={(e) => setPassword(e.target.value)} />
             <button onClick={handleAuth}>{isLogin ? "Giriş Yap" : "Kayıt Ol"}</button>
             {errorMessage && <span className={styles.errorMessage}>{errorMessage}</span>}
+            {successMessage && <p className={styles.successMessage}>{successMessage}</p>}
             <p onClick={handleSignInOut}>{isLogin ? "Hesabınız yok mu? Kayıt olun!" : "Zaten üye misiniz? Giriş yapın!"}</p>
-            <p 
-              style={{ cursor: "context-menu", color: "#258cff", textDecoration: "underline" }}
-            >
-              Şifremi Unuttum
-            </p> 
+            {isLogin && (
+              <button
+              className={styles.forgotPasswordButton}
+              type="button"
+              onClick={() => setPage("forgot")}
+              >
+                🔐 Şifremi Unuttum
+              </button>
+            )}
           </div>
         )}
 
+        {page === "forgot" && (
+          <div className={styles.forgotPasswordContainer}>
+            <h2 className={styles.forgotTitle}>🔐 Şifremi Unuttum</h2>
+            <p className={styles.forgotInfo}>Kayıtlı e-posta adresinizi girin. Size bir şifre sıfırlama bağlantısı gönderilecektir.</p>
+  
+            <input className={styles.forgotInput} type="email" placeholder="E-posta adresiniz" readOnly value={email} />
+  
+            <div className={styles.forgotButtonGroup}>
+              <button className={styles.forgotButton} onClick={handlePasswordReset}>
+                Gönder
+              </button>
+              <button className={styles.forgotBackButton} onClick={() => setPage("login")}>
+                Geri Dön
+              </button>
+            </div>
+          </div>
+        )}
+        
         {is2FAwaiting && (
           <div className={styles.authBox}>
             <h2>📲 Doğrulama Kodu</h2>

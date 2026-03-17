@@ -359,14 +359,13 @@
   background-color: #218838;
 }
 
-/* Hata Mesajları (Genel) */
 .successMessage {
-  color: #225c17; /* Kırmızı tonunda hata mesajı */
+  color: #225c17; 
   font-size: 14px;
   font-weight: bold;
   margin-top: 5px;
   text-align: center;
-  background: #badbaf; /* Hafif kırmızı arka plan */
+  background: #badbaf;
   padding: 8px;
   border-radius: 5px;
   border: 1px solid #075c2a;

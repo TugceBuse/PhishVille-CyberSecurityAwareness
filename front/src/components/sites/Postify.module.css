@@ -677,3 +677,143 @@
 .chatInput button:hover {
   background-color: #000000;
 }
+
+
+/* PICKING PICTURE FOR POST CSS */
+.imagePickerButton {
+  padding: 6px;
+  background-color: #4f46e5;
+  color: #ffffff;
+  border: none;
+  margin-right: 2px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.imagePickerButton:hover {
+  background-color: #4338ca; 
+}
+
+.selectedImageLabel {
+  font-size: 14px;
+  color: #374151;
+  margin-top: 12px;
+  margin-bottom: -6px;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(17, 24, 39, 0.6); 
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(3px);
+}
+
+.modalContent {
+  background: #ffffff;
+  padding: 24px 28px;
+  border-radius: 12px;
+  width: 480px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { transform: scale(0.97); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+.modalContent h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.imageList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+}
+
+.imageOption {
+  width: 120px;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 13px;
+  padding: 8px;
+  background-color: #f9fafb;
+  border: 2px solid transparent;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.imageOption span{
+  color: #374151;
+  font-weight: 500;
+}
+
+.imageOption img {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 4px;
+}
+
+.imageOption:hover {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px #c7d2fe;
+}
+
+.selected {
+  border-color: #4f46e5 !important;
+  background-color: #eef2ff;
+  box-shadow: 0 0 0 2px #c7d2fe;
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.modalButtons button {
+  padding: 8px 14px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.modalButtons button:first-of-type {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.modalButtons button:first-of-type:hover {
+  background-color: #d1d5db;
+}
+
+.modalButtons button:last-of-type {
+  background-color: #4f46e5;
+  color: white;
+}
+
+.modalButtons button:last-of-type:hover {
+  background-color: #4338ca;
+}

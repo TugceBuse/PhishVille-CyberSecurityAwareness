@@ -4,6 +4,8 @@ import styles from './Postify.module.css';
 import { useGameContext } from "../../Contexts/GameContext";
 import PostifyAuth from './PostifyAuth';
 import { useEventLog } from '../../Contexts/EventLogContext';
+import { useQuestManager } from '../../Contexts/QuestManager';
+import { useFileContext } from "../../Contexts/FileContext";
 
 const initialPosts = [
   {
@@ -168,7 +170,20 @@ const getRelativeTime = (timestamp) => {
 
 const Postify = () => {
   const { PostifyInfo, setPostifyInfo } = useGameContext();
-  const { addEventLog, addEventLogOnChange } = useEventLog();
+  const { completeQuest, quests } = useQuestManager();
+  const { addEventLogOnce, addEventLog, addEventLogOnChange } = useEventLog();
+  const { files } = useFileContext();
+
+  const availableImages = Object.entries(files)
+  .filter(([key, file]) =>
+    file.available &&                    // kullanılabilir olmalı
+    (file.type === "jpg" || file.type === "png") &&              // sadece görseller
+    file.visible !== false              // görünmez (gizli) olanları gösterme
+  )
+  .map(([key, file]) => ({
+    value: file.content,
+    label: file.label || key
+  }));
 
   const [showSettings, setShowSettings] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -203,6 +218,9 @@ const Postify = () => {
   };
 
   const [newPostContent, setNewPostContent] = useState('');
+  const [newPostImage, setNewPostImage] = useState('');
+  const [showImagePicker, setShowImagePicker] = useState(false);
+  const [selectedImageTemp, setSelectedImageTemp] = useState('');
   const [timestamps, setTimestamps] = useState({});
 
   const toggleLike = (postId) => {
@@ -238,6 +256,7 @@ const Postify = () => {
       time: timestamp,
       avatar: '/avatars/avatar9.png',
       content: newPostContent,
+      image: newPostImage || null,
       likes: 0,
       commands: 0,
       privacySettings: PostifyInfo.privacySettings // Burada ayarını alıyoruz
@@ -245,7 +264,33 @@ const Postify = () => {
     setPosts([newPost, ...posts]);
     setLikes((prev) => ({ ...prev, [newPost.id]: { count: 0, liked: false } }));
     setTimestamps((prev) => ({ ...prev, [newPost.id]: timestamp }));
+
+    if (newPostImage === "/files/farkindalik_afisi.jpg") {
+      completeQuest("sharing_post");
+      console.log("Farkındalık afişi paylaşıldı, görev tamamlandı!");
+
+      addEventLogOnce(
+        "create_post",   // type
+        "image",      // uniqueField (data içindeki unique alan)
+        newPostImage,   // uniqueValue (data içindeki unique alanın değeri)
+        {
+          type: "create_post",
+          questId: "sharing_post",
+          logEventType: "post_share",
+          value: 20,
+          data: {
+            postId: newPost.id,
+            content: newPostContent.slice(0, 120), // Çok uzun içeriklerin sadece ilk kısmı
+            privacy: PostifyInfo.privacySettings,
+            image: newPostImage
+          }
+        }
+      );
+    }
+
     setNewPostContent('');
+    setNewPostImage('');
+    setSelectedImageTemp('');
 
     // PostifyInfo.userPosts yoksa boş dizi olarak başlat!
     setPostifyInfo({
@@ -255,7 +300,6 @@ const Postify = () => {
 
     addEventLog({
       type: "create_post",
-      questId: "post_share",
       logEventType: "post_share",
       value: 0,
       data: {
@@ -267,7 +311,7 @@ const Postify = () => {
   };
 
   const dummyChats = [
-    { id: 1, name: "Ahmet Kaya", avatar: "/avatars/avatar1.png", messages: ["Selam!", "Toplantı ne zaman?"] },
+    { id: 1, name: "Ahmet Kara", avatar: "/avatars/avatar1.png", messages: ["Selam!", "Toplantı ne zaman?"] },
     { id: 2, name: "Zeynep Güler", avatar: "/avatars/avatar5.png", messages: ["Merhaba!", "Yarın görüşelim mi?"] },
     { id: 3, name: "IT Departmanı", avatar: "/avatars/avatar2.png", messages: ["Sistemde bakım yapılacak."] },
   ];
@@ -564,7 +608,52 @@ const handlePasswordUpdate = () => {
                       </ul>
                     )}
                   </div>
+                  
+                  <button
+                    className={styles.imagePickerButton}
+                    onClick={() => setShowImagePicker(true)}
+                  >
+                    📷 Resim Ekle
+                  </button>
+
+                  {showImagePicker && (
+                    <div className={styles.modalOverlay}>
+                      <div className={styles.modalContent}>
+                        <h3>🖼️ Resim Seç</h3>
+                        <div className={styles.imageList}>
+                          {availableImages.map((img) => (
+                            <div
+                              key={img.value}
+                              className={`${styles.imageOption} ${selectedImageTemp === img.value ? styles.selected : ''}`}
+                              onClick={() => setSelectedImageTemp(img.value)}
+                            >
+                              <img src={img.value} alt={img.label} />
+                              <span>{img.label}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <div className={styles.modalButtons}>
+                          <button onClick={() => setShowImagePicker(false)}>İptal</button>
+                          <button
+                            disabled={!selectedImageTemp}
+                            onClick={() => {
+                              setNewPostImage(selectedImageTemp);
+                              setShowImagePicker(false);
+                            }}
+                          >
+                            Tamamla
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <button className={styles.button} onClick={handlePostShare}>Paylaş</button>
+                  {selectedImageTemp && (
+                    <div className={styles.selectedImageLabel}>
+                      🖼️ Seçilen: <strong>{availableImages.find(img => img.value === newPostImage)?.label}</strong>
+                    </div>
+                  )}
                 </div>
 
                 {posts.map((post) => {
